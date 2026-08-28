@@ -43,12 +43,15 @@ stages:
     steps:
     - script: |
         if [ "$(Build.SourceBranchName)" == "main" ]; then
-          echo "##vso[task.setvariable name=imageTag]latest"
-          echo "##vso[task.setvariable name=secondaryTag]v1.0.$(Build.BuildId)"
+          echo "Setting tags for main branch..."
+          echo "##vso[task.setvariable name=imageTag;isOutput=true]latest"
+          echo "##vso[task.setvariable name=secondaryTag;isOutput=true]v1.0.$(Build.BuildId)"
         else
-          echo "##vso[task.setvariable name=imageTag]dev"
-          echo "##vso[task.setvariable name=secondaryTag]dev-$(Build.BuildId)"
+          echo "Setting tags for develop/feature branch..."
+          echo "##vso[task.setvariable name=imageTag;isOutput=true]dev"
+          echo "##vso[task.setvariable name=secondaryTag;isOutput=true]dev-$(Build.BuildId)"
         fi
+      name: SetTags
       displayName: 'Determine Dynamic Docker Tags'
 
     - task: Docker@2
@@ -59,5 +62,5 @@ stages:
         dockerfile: 'Dockerfile'
         containerRegistry: '$(dockerRegistryServiceConnection)'
         tags: |
-          $(imageTag)
-          $(secondaryTag)
+          $(SetTags.imageTag)
+          $(SetTags.secondaryTag)
