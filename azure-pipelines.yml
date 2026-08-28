@@ -41,9 +41,19 @@ stages:
   - job: PushJob
     displayName: 'Build Docker Image & Push to Docker Hub'
     variables:
-      tag1: $[eq(variables['Build.SourceBranchName'], 'main') && 'latest' || 'dev']
-      tag2: $[eq(variables['Build.SourceBranchName'], 'main') && format('v1.0.{0}', variables['Build.BuildId']) || format('dev-{0}', variables['Build.BuildId'])]
+      # Verified Azure DevOps macro syntax for tags
+      isMain: $[eq(variables['Build.SourceBranchName'], 'main')]
     steps:
+    - script: |
+        if [ "$(isMain)" = "True" ]; then
+          echo "##vso[task.setvariable name=tag1]latest"
+          echo "##vso[task.setvariable name=tag2]v1.0.$(Build.BuildId)"
+        else
+          echo "##vso[task.setvariable name=tag1]dev"
+          echo "##vso[task.setvariable name=tag2]dev-$(Build.BuildId)"
+        fi
+      displayName: 'Set Dynamic Tag Values Safely'
+
     - task: Docker@2
       displayName: 'Build and Push Docker Image'
       inputs:
