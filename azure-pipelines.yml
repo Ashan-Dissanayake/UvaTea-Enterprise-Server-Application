@@ -11,8 +11,6 @@ variables:
   buildConfiguration: 'Release'
   dockerRegistryServiceConnection: 'docker-hub-connection' 
   dockerRepository: 'ashanpd/uvateb-api'
-  [string]tag1: $[eq(variables['Build.SourceBranchName'], 'main') && 'latest' || 'dev']
-  [string]tag2: $[eq(variables['Build.SourceBranchName'], 'main') && format('v1.0.{0}', variables['Build.BuildId']) || format('dev-{0}', variables['Build.BuildId'])]
 
 stages:
 - stage: BuildAndTest
@@ -42,6 +40,9 @@ stages:
   jobs:
   - job: PushJob
     displayName: 'Build Docker Image & Push to Docker Hub'
+    variables:
+      tag1: $[eq(variables['Build.SourceBranchName'], 'main') && 'latest' || 'dev']
+      tag2: $[eq(variables['Build.SourceBranchName'], 'main') && format('v1.0.{0}', variables['Build.BuildId']) || format('dev-{0}', variables['Build.BuildId'])]
     steps:
     - task: Docker@2
       displayName: 'Build and Push Docker Image'
