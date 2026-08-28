@@ -9,8 +9,8 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
-  dockerRegistryServiceConnection: 'docker-hub-connection' # Azure DevOps Service Connection නම
-  dockerRepository: 'your-dockerhub-username/uvertea-api'  # ඔබේ Docker Hub username සහ repo නම
+  dockerRegistryServiceConnection: 'docker-hub-connection' 
+  dockerRepository: 'ashanpd/uvateb-api' 
 
 stages:
 - stage: BuildAndTest
