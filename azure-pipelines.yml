@@ -40,20 +40,7 @@ stages:
   jobs:
   - job: PushJob
     displayName: 'Build Docker Image & Push to Docker Hub'
-    variables:
-      # Verified Azure DevOps macro syntax for tags
-      isMain: $[eq(variables['Build.SourceBranchName'], 'main')]
     steps:
-    - script: |
-        if [ "$(isMain)" = "True" ]; then
-          echo "##vso[task.setvariable name=tag1]latest"
-          echo "##vso[task.setvariable name=tag2]v1.0.$(Build.BuildId)"
-        else
-          echo "##vso[task.setvariable name=tag1]dev"
-          echo "##vso[task.setvariable name=tag2]dev-$(Build.BuildId)"
-        fi
-      displayName: 'Set Dynamic Tag Values Safely'
-
     - task: Docker@2
       displayName: 'Build and Push Docker Image'
       inputs:
@@ -62,5 +49,5 @@ stages:
         dockerfile: 'Dockerfile'
         containerRegistry: '$(dockerRegistryServiceConnection)'
         tags: |
-          $(tag1)
-          $(tag2)
+          $(Build.SourceBranchName)
+          $(Build.BuildId)
