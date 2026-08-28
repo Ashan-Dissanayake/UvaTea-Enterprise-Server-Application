@@ -1,0 +1,29 @@
+# .NET Build outputs & caches
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*~
+*.lock.json
+
+# Visual Studio / Rider / IDE specific folders
+.vs/
+.idea/
+*.rsuser
+
+# Environment and Local Secrets (CRITICAL SECURITY)
+.env
+*.env
+appsettings.Production.json
+appsettings.Development.json
+appsettings.*.json
+!appsettings.json
+
+# OS specific temporary files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store

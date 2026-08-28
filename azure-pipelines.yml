@@ -1,0 +1,63 @@
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  dockerRegistryServiceConnection: 'docker-hub-connection' # Azure DevOps Service Connection නම
+  dockerRepository: 'your-dockerhub-username/uvertea-api'  # ඔබේ Docker Hub username සහ repo නම
+
+stages:
+- stage: BuildAndTest
+  displayName: 'Quality Gate: Build & Unit Tests'
+  jobs:
+  - job: TestJob
+    displayName: 'Compile Solution & Run Tests'
+    steps:
+    - task: UseDotNet@2
+      inputs:
+        packageType: 'sdk'
+        version: '10.x'
+
+    - script: dotnet restore
+      displayName: 'Restore NuGet Packages'
+
+    - script: dotnet build --configuration $(buildConfiguration) --no-restore
+      displayName: 'Build Solution (.sln)'
+
+    - script: dotnet test tests/UverTeaServerApp.UnitTests/UverTeaServerApp.UnitTests.csproj --configuration $(buildConfiguration) --no-build --verbosity normal
+      displayName: 'Execute xUnit Unit Tests'
+
+- stage: DockerBuildAndPush
+  displayName: 'Dockerize & Push to Registry'
+  dependsOn: BuildAndTest
+  condition: succeeded()
+  jobs:
+  - job: PushJob
+    displayName: 'Build Docker Image & Push to Docker Hub'
+    steps:
+    - script: |
+        if [ "$(Build.SourceBranchName)" == "main" ]; then
+          echo "##vso[task.setvariable name=imageTag]latest"
+          echo "##vso[task.setvariable name=secondaryTag]v1.0.$(Build.BuildId)"
+        else
+          echo "##vso[task.setvariable name=imageTag]dev"
+          echo "##vso[task.setvariable name=secondaryTag]dev-$(Build.BuildId)"
+        fi
+      displayName: 'Determine Dynamic Docker Tags'
+
+    - task: Docker@2
+      displayName: 'Build and Push Docker Image'
+      inputs:
+        command: 'buildAndPush'
+        repository: '$(dockerRepository)'
+        dockerfile: 'Dockerfile'
+        containerRegistry: '$(dockerRegistryServiceConnection)'
+        tags: |
+          $(imageTag)
+          $(secondaryTag)

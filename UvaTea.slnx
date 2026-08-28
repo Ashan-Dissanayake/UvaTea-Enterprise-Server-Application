@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/tests/">
+    <Project Path="tests/UverTeaServerApp.UnitTests/UverTeaServerApp.UnitTests.csproj" />
+  </Folder>
+  <Project Path="UverTeaServerApp/UverTeaServerApp.csproj" />
+</Solution>
