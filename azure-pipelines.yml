@@ -11,6 +11,8 @@ variables:
   buildConfiguration: 'Release'
   dockerRegistryServiceConnection: 'docker-hub-connection' 
   dockerRepository: 'ashanpd/uvateb-api'
+  [string]tag1: $[eq(variables['Build.SourceBranchName'], 'main') && 'latest' || 'dev']
+  [string]tag2: $[eq(variables['Build.SourceBranchName'], 'main') && format('v1.0.{0}', variables['Build.BuildId']) || format('dev-{0}', variables['Build.BuildId'])]
 
 stages:
 - stage: BuildAndTest
@@ -49,5 +51,5 @@ stages:
         dockerfile: 'Dockerfile'
         containerRegistry: '$(dockerRegistryServiceConnection)'
         tags: |
-          $[[ eq(variables['Build.SourceBranchName'], 'main') ]] && echo "latest" || echo "dev"
-          $[[ eq(variables['Build.SourceBranchName'], 'main') ]] && echo "v1.0.$(Build.BuildId)" || echo "dev-$(Build.BuildId)"
+          $(tag1)
+          $(tag2)
