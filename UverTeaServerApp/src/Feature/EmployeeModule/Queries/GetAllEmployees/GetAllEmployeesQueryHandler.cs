@@ -1,7 +1,7 @@
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using UverTeaServerApp.Data;
+using UverTeaServerApp.Shared.Data;
 using UverTeaServerApp.Shared.Common;
 using UverTeaServerApp.Shared.Extensions;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Dtos;
@@ -36,7 +36,8 @@ public class GetAllEmployeesQueryHandler : IRequestHandler<GetAllEmployeesQuery,
                 (e.Callingname != null && e.Callingname.Contains(search)) ||
                 (e.Number != null && e.Number.Contains(search)) ||
                 (e.Nic != null && e.Nic.Contains(search)) ||
-                (e.Mobile != null && e.Mobile.Contains(search)));
+                (e.Mobile != null && e.Mobile.Contains(search)) ||
+                (e.Email != null && e.Email.Contains(search)));
         }
 
         var projectedQuery = query.ProjectToType<EmployeeDetailResponseDto>();

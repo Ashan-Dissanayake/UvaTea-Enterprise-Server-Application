@@ -1,6 +1,6 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using UverTeaServerApp.Data;
+using UverTeaServerApp.Shared.Data;
 
 namespace UverTeaServerApp.src.Feature.UserModule.Commands.UpdateUser;
 
@@ -54,3 +54,4 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
     private async Task<bool> RoleExists(int roleId, CancellationToken ct) =>
         await _context.Roles.AnyAsync(r => r.Id == roleId, ct);
 }
+

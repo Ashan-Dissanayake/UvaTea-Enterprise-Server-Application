@@ -1,6 +1,6 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using UverTeaServerApp.Data;
+using UverTeaServerApp.Shared.Data;
 
 namespace UverTeaServerApp.src.Feature.EmployeeModule.Commands.UpdateEmployee;
 
@@ -22,8 +22,16 @@ public class UpdateEmployeeCommandValidator : AbstractValidator<UpdateEmployeeCo
             .MustAsync(BeUniqueNic).WithMessage("An employee with NIC '{PropertyValue}' already exists.");
 
         RuleFor(x => x.Mobile)
-            .MustAsync(BeUniqueMobile).When(x => !string.IsNullOrEmpty(x.Mobile))
+            .MustAsync((cmd, mobile, token) => BeUniqueMobile(cmd, mobile!, token))
+            .When(x => !string.IsNullOrEmpty(x.Mobile))
             .WithMessage("An employee with Mobile '{PropertyValue}' already exists.");
+
+        RuleFor(x => x.Email)
+            .EmailAddress().WithMessage("Invalid email format.")
+            .MaximumLength(50).WithMessage("Email cannot exceed 50 characters.")
+            .MustAsync((cmd, email, token) => BeUniqueEmail(cmd, email!, token))
+            .When(x => !string.IsNullOrEmpty(x.Email))
+            .WithMessage("An employee with Email '{PropertyValue}' already exists.");
 
         // Foreign Key Cross-Validations
         RuleFor(x => x.GenderId)
@@ -44,6 +52,9 @@ public class UpdateEmployeeCommandValidator : AbstractValidator<UpdateEmployeeCo
 
     private async Task<bool> BeUniqueMobile(UpdateEmployeeCommand command, string mobile, CancellationToken cancellationToken) =>
         !await _context.Employees.AnyAsync(e => e.Id != command.Id && e.Mobile == mobile, cancellationToken);
+
+    private async Task<bool> BeUniqueEmail(UpdateEmployeeCommand command, string email, CancellationToken cancellationToken) =>
+        !await _context.Employees.AnyAsync(e => e.Id != command.Id && e.Email == email, cancellationToken);
 
     private async Task<bool> GenderExists(int genderId, CancellationToken cancellationToken) =>
         await _context.Genders.AnyAsync(g => g.Id == genderId, cancellationToken);

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
 
-namespace UverTeaServerApp.src.Shared.Hubs;
+namespace UverTeaServerApp.Shared.Hubs;
 
 public class NotificationHub : Hub
 {

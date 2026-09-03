@@ -1,4 +1,4 @@
-using UverTeaServerApp.Data;
+using UverTeaServerApp.Shared.Data;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
 
 namespace UverTeaServerApp.UnitTests.Common;
@@ -53,3 +53,4 @@ public static class MockDataGenerator
         context.SaveChanges();
     }
 }
+

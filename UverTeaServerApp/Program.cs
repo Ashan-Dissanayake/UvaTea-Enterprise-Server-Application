@@ -4,16 +4,14 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using UverTeaServerApp.Data;
-using UverTeaServerApp.src.Feature.EmployeeModule.Services;
-using UverTeaServerApp.src.shared.Middlewares.Exceptions;
 using UverTeaServerApp.Shared.Behaviors;
-using UverTeaServerApp.Shared.Persistence;
-using UverTeaServerApp.src.Shared.Security;
-using UverTeaServerApp.src.Shared.Service;
 using UverTeaServerApp.Shared.Caching;
-using UverTeaServerApp.src.Shared.Hubs;
-using UverTeaServerApp.src.Shared.Persistence;
+using UverTeaServerApp.Shared.Data;
+using UverTeaServerApp.Shared.Hubs;
+using UverTeaServerApp.Shared.Middlewares;
+using UverTeaServerApp.Shared.Security;
+using UverTeaServerApp.Shared.Services;
+using UverTeaServerApp.src.Feature.EmployeeModule.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,9 +1,9 @@
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using UverTeaServerApp.Data;
+using UverTeaServerApp.Shared.Data;
 using UverTeaServerApp.src.Feature.UserModule.Models.Dtos;
-using UverTeaServerApp.src.shared.Middlewares.Exceptions;
+using UverTeaServerApp.Shared.Middlewares;
 
 namespace UverTeaServerApp.src.Feature.UserModule.Queries.GetUserById;
 
@@ -34,3 +34,4 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserDet
         return user.Adapt<UserDetailResponseDto>();
     }
 }
+

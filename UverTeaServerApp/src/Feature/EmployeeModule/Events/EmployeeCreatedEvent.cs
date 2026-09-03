@@ -4,7 +4,7 @@ namespace UverTeaServerApp.src.Feature.EmployeeModule.Events;
 
 public record EmployeeCreatedEvent(
     int EmployeeId,
-    string FirstName,
-    string LastName,
-    string Email
+    string Fullname,
+    string? Callingname,
+    string? Email
 ) : INotification;

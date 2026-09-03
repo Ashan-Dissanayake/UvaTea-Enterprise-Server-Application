@@ -1,4 +1,4 @@
-namespace UverTeaServerApp.src.Shared.Security;
+namespace UverTeaServerApp.Shared.Security;
 
 public class JwtSettings
 {

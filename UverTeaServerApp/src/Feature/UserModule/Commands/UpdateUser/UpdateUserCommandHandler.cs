@@ -1,10 +1,10 @@
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using UverTeaServerApp.Data;
+using UverTeaServerApp.Shared.Data;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
 using UverTeaServerApp.src.Feature.UserModule.Models.Dtos;
-using UverTeaServerApp.src.shared.Middlewares.Exceptions;
+using UverTeaServerApp.Shared.Middlewares;
 using Mapster;
 
 namespace UverTeaServerApp.src.Feature.UserModule.Commands.UpdateUser;
@@ -12,11 +12,13 @@ namespace UverTeaServerApp.src.Feature.UserModule.Commands.UpdateUser;
 public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, UserDetailResponseDto>
 {
     private readonly UvaTeaDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly PasswordHasher<User> _passwordHasher;
 
-    public UpdateUserCommandHandler(UvaTeaDbContext context)
+    public UpdateUserCommandHandler(UvaTeaDbContext context, IUnitOfWork unitOfWork)
     {
         _context = context;
+        _unitOfWork = unitOfWork;
         _passwordHasher = new PasswordHasher<User>();
     }
 
@@ -45,7 +47,7 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, UserD
         }
 
         // 4. Updatedat is handled automatically by AuditableEntityInterceptor
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // 5. Reload navigations for the response DTO
         await _context.Entry(user).Reference(u => u.Userstatus).LoadAsync(cancellationToken);
@@ -54,3 +56,4 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, UserD
         return user.Adapt<UserDetailResponseDto>();
     }
 }
+

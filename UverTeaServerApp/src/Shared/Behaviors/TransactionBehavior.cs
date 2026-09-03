@@ -1,6 +1,6 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
-using UverTeaServerApp.src.Shared.Persistence;
+using UverTeaServerApp.Shared.Data;
 
 namespace UverTeaServerApp.Shared.Behaviors;
 
@@ -23,7 +23,7 @@ public class TransactionBehavior<TRequest, TResponse> : IPipelineBehavior<TReque
         RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
-        if (!IsCommand())
+        if (request is not ITransactionalRequest)
         {
             return await next();
         }
@@ -49,12 +49,5 @@ public class TransactionBehavior<TRequest, TResponse> : IPipelineBehavior<TReque
             throw;
         }
     }
-
-    private static bool IsCommand()
-    {
-        var requestType = typeof(TRequest);
-        return requestType.Name.EndsWith("Command", StringComparison.OrdinalIgnoreCase) ||
-               requestType.Name.Contains("Command", StringComparison.OrdinalIgnoreCase) ||
-               typeof(ITransactionalRequest).IsAssignableFrom(requestType);
-    }
 }
+

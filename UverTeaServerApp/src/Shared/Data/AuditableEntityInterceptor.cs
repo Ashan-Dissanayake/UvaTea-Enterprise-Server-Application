@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using UverTeaServerApp.Shared.Entities;
 
-namespace UverTeaServerApp.Shared.Persistence;
+namespace UverTeaServerApp.Shared.Data;
 
 public class AuditableEntityInterceptor : SaveChangesInterceptor
 {

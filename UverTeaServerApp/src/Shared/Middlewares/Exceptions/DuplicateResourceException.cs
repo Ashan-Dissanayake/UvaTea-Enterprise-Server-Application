@@ -1,5 +1,5 @@
 
-namespace UverTeaServerApp.src.shared.Middlewares.Exceptions;
+namespace UverTeaServerApp.Shared.Middlewares;
 
 public class DuplicateResourceException : Exception
 {

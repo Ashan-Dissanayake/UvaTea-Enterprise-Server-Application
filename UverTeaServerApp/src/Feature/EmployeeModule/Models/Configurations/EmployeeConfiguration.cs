@@ -53,6 +53,10 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
                .HasMaxLength(10)
                .IsFixedLength();
 
+        builder.Property(e => e.Email)
+               .HasColumnName("email")
+               .HasMaxLength(50);
+
         builder.Property(e => e.Land)
                .HasColumnName("land")
                .HasMaxLength(10)

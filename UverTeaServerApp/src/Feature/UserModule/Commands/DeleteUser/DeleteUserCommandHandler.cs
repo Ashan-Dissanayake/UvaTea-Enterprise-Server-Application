@@ -1,17 +1,19 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using UverTeaServerApp.Data;
-using UverTeaServerApp.src.shared.Middlewares.Exceptions;
+using UverTeaServerApp.Shared.Data;
+using UverTeaServerApp.Shared.Middlewares;
 
 namespace UverTeaServerApp.src.Feature.UserModule.Commands.DeleteUser;
 
 public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Unit>
 {
     private readonly UvaTeaDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public DeleteUserCommandHandler(UvaTeaDbContext context)
+    public DeleteUserCommandHandler(UvaTeaDbContext context, IUnitOfWork unitOfWork)
     {
         _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Unit> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
@@ -25,8 +27,9 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Unit>
         }
 
         _context.Users.Remove(user);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;
     }
 }
+

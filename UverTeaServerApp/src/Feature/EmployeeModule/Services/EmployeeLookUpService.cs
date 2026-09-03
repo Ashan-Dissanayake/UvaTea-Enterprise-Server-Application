@@ -1,8 +1,8 @@
 
 using Microsoft.EntityFrameworkCore;
 using Mapster;
-using UverTeaServerApp.Data;
-using UverTeaServerApp.src.shared.Middlewares.Exceptions;
+using UverTeaServerApp.Shared.Data;
+using UverTeaServerApp.Shared.Middlewares;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Dtos;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
 

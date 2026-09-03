@@ -1,10 +1,10 @@
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using UverTeaServerApp.Data;
+using UverTeaServerApp.Shared.Data;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
 
-namespace UverTeaServerApp.src.Shared.Security;
+namespace UverTeaServerApp.Shared.Security;
 
 public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponseDto>
 {
@@ -44,3 +44,4 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponseDt
         return new LoginResponseDto(token, user.Username ?? string.Empty, user.Role?.Name ?? "Employee");
     }
 }
+

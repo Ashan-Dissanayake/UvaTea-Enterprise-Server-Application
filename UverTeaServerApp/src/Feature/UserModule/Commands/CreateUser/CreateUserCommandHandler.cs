@@ -1,7 +1,7 @@
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using UverTeaServerApp.Data;
+using UverTeaServerApp.Shared.Data;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
 using UverTeaServerApp.src.Feature.UserModule.Models.Dtos;
 
@@ -10,11 +10,13 @@ namespace UverTeaServerApp.src.Feature.UserModule.Commands.CreateUser;
 public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserDetailResponseDto>
 {
     private readonly UvaTeaDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly PasswordHasher<User> _passwordHasher;
 
-    public CreateUserCommandHandler(UvaTeaDbContext context)
+    public CreateUserCommandHandler(UvaTeaDbContext context, IUnitOfWork unitOfWork)
     {
         _context = context;
+        _unitOfWork = unitOfWork;
         _passwordHasher = new PasswordHasher<User>();
     }
 
@@ -32,7 +34,7 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserD
         // by the AuditableEntityInterceptor registered in Program.cs.
 
         _context.Users.Add(user);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Reload the entity with its navigation properties populated so that
         // the response DTO (Userstatus, Role) is fully hydrated.
@@ -42,3 +44,4 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserD
         return user.Adapt<UserDetailResponseDto>();
     }
 }
+

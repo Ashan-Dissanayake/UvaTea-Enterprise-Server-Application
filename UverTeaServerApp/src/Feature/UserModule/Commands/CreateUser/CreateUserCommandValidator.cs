@@ -1,6 +1,6 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using UverTeaServerApp.Data;
+using UverTeaServerApp.Shared.Data;
 
 namespace UverTeaServerApp.src.Feature.UserModule.Commands.CreateUser;
 
@@ -61,3 +61,4 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
     private async Task<bool> RoleExists(int roleId, CancellationToken cancellationToken) =>
         await _context.Roles.AnyAsync(r => r.Id == roleId, cancellationToken);
 }
+

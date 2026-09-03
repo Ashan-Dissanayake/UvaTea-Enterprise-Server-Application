@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -307,6 +307,10 @@ public partial class UvateafactoryContext : DbContext
                 .IsUnicode(false)
                 .IsFixedLength()
                 .HasColumnName("mobile");
+            entity.Property(e => e.Email)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("email");
             entity.Property(e => e.Nic)
                 .HasMaxLength(12)
                 .IsUnicode(false)

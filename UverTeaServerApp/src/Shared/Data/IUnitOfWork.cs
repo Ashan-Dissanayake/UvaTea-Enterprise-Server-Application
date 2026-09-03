@@ -1,4 +1,4 @@
-namespace UverTeaServerApp.src.Shared.Persistence;
+namespace UverTeaServerApp.Shared.Data;
 
 public interface IUnitOfWork
 {

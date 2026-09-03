@@ -1,7 +1,7 @@
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using UverTeaServerApp.Data;
+using UverTeaServerApp.Shared.Data;
 using UverTeaServerApp.Shared.Common;
 using UverTeaServerApp.Shared.Extensions;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Dtos;
@@ -38,6 +38,9 @@ public class SearchEmployeesQueryHandler : IRequestHandler<SearchEmployeesQuery,
 
             if (paramsDict.TryGetValue("nic", out var nic) && !string.IsNullOrEmpty(nic))
                 query = query.Where(e => e.Nic != null && e.Nic.Contains(nic));
+
+            if (paramsDict.TryGetValue("email", out var email) && !string.IsNullOrEmpty(email))
+                query = query.Where(e => e.Email != null && e.Email.Contains(email));
         }
 
         var paginationParams = request.Pagination ?? new PaginationParams();
@@ -50,7 +53,8 @@ public class SearchEmployeesQueryHandler : IRequestHandler<SearchEmployeesQuery,
                 (e.Callingname != null && e.Callingname.Contains(search)) ||
                 (e.Number != null && e.Number.Contains(search)) ||
                 (e.Nic != null && e.Nic.Contains(search)) ||
-                (e.Mobile != null && e.Mobile.Contains(search)));
+                (e.Mobile != null && e.Mobile.Contains(search)) ||
+                (e.Email != null && e.Email.Contains(search)));
         }
 
         var projectedQuery = query.ProjectToType<EmployeeDetailResponseDto>();

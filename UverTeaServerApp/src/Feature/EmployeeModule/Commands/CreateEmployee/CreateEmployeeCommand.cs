@@ -25,6 +25,10 @@ public record CreateEmployeeCommand(
     [RegularExpression(@"^(?:0|94|\+94)?(7[01245678]\d{7})$", ErrorMessage = "Invalid Sri Lankan mobile number format.")]
     string? Mobile,
 
+    [EmailAddress(ErrorMessage = "Invalid email address.")]
+    [StringLength(50, ErrorMessage = "Email cannot exceed 50 characters.")]
+    string? Email,
+
     [RegularExpression("^\\d{0,10}$", ErrorMessage = "Invalid Land Number")]
     string? Land,
 
@@ -48,4 +52,4 @@ public record CreateEmployeeCommand(
     [RegularExpression("^.*$", ErrorMessage = "Invalid Description")]
     string? Description
 
-) : IRequest<EmployeeDetailResponseDto>;
+) : IRequest<EmployeeDetailResponseDto>, UverTeaServerApp.Shared.Behaviors.ITransactionalRequest;

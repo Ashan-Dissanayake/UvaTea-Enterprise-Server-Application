@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace UverTeaServerApp.src.shared.Middlewares.Exceptions;
+namespace UverTeaServerApp.Shared.Middlewares;
 
 public class GlobalExceptionHandler : IExceptionHandler
 {

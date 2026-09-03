@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using UverTeaServerApp.Data;
+using UverTeaServerApp.Shared.Data;
 
 namespace UverTeaServerApp.UnitTests.Common;
 
@@ -16,3 +16,4 @@ public static class TestDbContextFactory
         return context;
     }
 }
+

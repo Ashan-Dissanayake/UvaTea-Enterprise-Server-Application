@@ -1,7 +1,7 @@
 
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
 
-namespace UverTeaServerApp.src.Shared.Security;
+namespace UverTeaServerApp.Shared.Security;
 
 public interface IJwtTokenService
 {

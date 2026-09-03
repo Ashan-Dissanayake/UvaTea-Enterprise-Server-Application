@@ -2,7 +2,7 @@ using FluentAssertions;
 using MediatR;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
 using UverTeaServerApp.src.Feature.UserModule.Commands.DeleteUser;
-using UverTeaServerApp.src.shared.Middlewares.Exceptions;
+using UverTeaServerApp.Shared.Middlewares;
 using UverTeaServerApp.UnitTests.Common;
 
 namespace UverTeaServerApp.UnitTests.Features.UserModule.Commands;
@@ -69,3 +69,4 @@ public class DeleteUserCommandHandlerTests
             .WithMessage("*999*");
     }
 }
+

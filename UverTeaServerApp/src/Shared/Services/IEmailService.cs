@@ -1,4 +1,4 @@
-namespace UverTeaServerApp.src.Shared.Service;
+namespace UverTeaServerApp.Shared.Services;
 
 public interface IEmailService
 {

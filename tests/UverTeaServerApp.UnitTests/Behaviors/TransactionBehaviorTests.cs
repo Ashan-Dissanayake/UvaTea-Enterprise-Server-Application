@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;
 using UverTeaServerApp.Shared.Behaviors;
-using UverTeaServerApp.src.Shared.Persistence;
+using UverTeaServerApp.Shared.Data;
 
 namespace UverTeaServerApp.UnitTests.Behaviors;
 
@@ -80,3 +80,4 @@ public class TransactionBehaviorTests
         _uowMock.Verify(u => u.RollbackTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 }
+

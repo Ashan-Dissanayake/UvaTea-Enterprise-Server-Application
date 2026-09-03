@@ -1,7 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace UverTeaServerApp.src.Shared.Security;
+namespace UverTeaServerApp.Shared.Security;
 
 [Route("api/[controller]")]
 [ApiController]

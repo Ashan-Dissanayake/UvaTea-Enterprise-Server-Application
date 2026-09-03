@@ -1,7 +1,7 @@
 using FluentAssertions;
 using UverTeaServerApp.src.Feature.EmployeeModule.Commands.UpdateEmployee;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
-using UverTeaServerApp.src.shared.Middlewares.Exceptions;
+using UverTeaServerApp.Shared.Middlewares;
 using UverTeaServerApp.UnitTests.Common;
 
 namespace UverTeaServerApp.UnitTests.Features.EmployeeModule.Commands;
@@ -90,3 +90,4 @@ public class UpdateEmployeeCommandHandlerTests
             .WithMessage("*999*");
     }
 }
+

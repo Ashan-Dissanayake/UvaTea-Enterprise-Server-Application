@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using UverTeaServerApp.Shared.Entities;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
 
-namespace UverTeaServerApp.Data;
+namespace UverTeaServerApp.Shared.Data;
 
 public class UvaTeaDbContext : DbContext
 {

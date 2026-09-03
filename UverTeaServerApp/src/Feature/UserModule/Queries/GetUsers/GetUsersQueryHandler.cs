@@ -1,7 +1,7 @@
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using UverTeaServerApp.Data;
+using UverTeaServerApp.Shared.Data;
 using UverTeaServerApp.Shared.Common;
 using UverTeaServerApp.Shared.Extensions;
 using UverTeaServerApp.src.Feature.UserModule.Models.Dtos;
@@ -51,3 +51,4 @@ public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, PagedResult<U
         return await projectedQuery.ToPagedResultAsync(paginationParams, cancellationToken);
     }
 }
+

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
 
-namespace UverTeaServerApp.src.Shared.Security;
+namespace UverTeaServerApp.Shared.Security;
 
 public class JwtTokenService : IJwtTokenService
 {

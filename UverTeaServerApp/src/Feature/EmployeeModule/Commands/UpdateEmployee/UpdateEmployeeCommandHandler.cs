@@ -1,26 +1,27 @@
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using UverTeaServerApp.Data;
+using UverTeaServerApp.Shared.Data;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Dtos;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
-using UverTeaServerApp.src.shared.Middlewares.Exceptions;
+using UverTeaServerApp.Shared.Middlewares;
 
 namespace UverTeaServerApp.src.Feature.EmployeeModule.Commands.UpdateEmployee;
 
 public class UpdateEmployeeCommandHandler : IRequestHandler<UpdateEmployeeCommand, EmployeeDetailResponseDto>
 {
     private readonly UvaTeaDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public UpdateEmployeeCommandHandler(UvaTeaDbContext context)
+    public UpdateEmployeeCommandHandler(UvaTeaDbContext context, IUnitOfWork unitOfWork)
     {
         _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<EmployeeDetailResponseDto> Handle(UpdateEmployeeCommand request, CancellationToken cancellationToken)
     {
-
-        Employee employee = await _context.Employees
+        var employee = await _context.Employees
             .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
 
         if (employee == null)
@@ -30,7 +31,7 @@ public class UpdateEmployeeCommandHandler : IRequestHandler<UpdateEmployeeComman
 
         request.Adapt(employee);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return employee.Adapt<EmployeeDetailResponseDto>();
     }

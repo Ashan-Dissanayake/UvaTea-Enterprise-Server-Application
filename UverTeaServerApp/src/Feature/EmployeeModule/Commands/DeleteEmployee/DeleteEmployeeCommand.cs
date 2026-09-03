@@ -6,4 +6,4 @@ namespace UverTeaServerApp.src.Feature.EmployeeModule.Commands.DeleteEmployee;
 public record DeleteEmployeeCommand(
     [Required]
     int Id
-) : IRequest<Unit>;
+) : IRequest<Unit>, UverTeaServerApp.Shared.Behaviors.ITransactionalRequest;

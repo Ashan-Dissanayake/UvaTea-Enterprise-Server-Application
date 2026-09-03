@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore.Storage;
-using UverTeaServerApp.Data;
 
-namespace UverTeaServerApp.src.Shared.Persistence;
+namespace UverTeaServerApp.Shared.Data;
 
 public class UnitOfWork : IUnitOfWork
 {
@@ -29,7 +28,6 @@ public class UnitOfWork : IUnitOfWork
     {
         try
         {
-            await _context.SaveChangesAsync(cancellationToken);
             if (_currentTransaction != null)
             {
                 await _currentTransaction.CommitAsync(cancellationToken);

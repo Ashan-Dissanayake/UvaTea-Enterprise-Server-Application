@@ -22,4 +22,4 @@ public record CreateUserCommand(
 
     string? Description
 
-) : IRequest<UserDetailResponseDto>;
+) : IRequest<UserDetailResponseDto>, UverTeaServerApp.Shared.Behaviors.ITransactionalRequest;

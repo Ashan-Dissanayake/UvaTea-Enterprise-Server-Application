@@ -26,6 +26,8 @@ public partial class Employee : IAuditableEntity, ISoftDeletable
 
     public string? Mobile { get; set; }
 
+    public string? Email { get; set; }
+
     public string? Land { get; set; }
 
     public DateOnly? Doassignment { get; set; }

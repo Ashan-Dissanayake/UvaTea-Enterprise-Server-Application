@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using UverTeaServerApp.src.Feature.EmployeeModule.Commands.DeleteEmployee;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
-using UverTeaServerApp.src.shared.Middlewares.Exceptions;
+using UverTeaServerApp.Shared.Middlewares;
 using UverTeaServerApp.UnitTests.Common;
 
 namespace UverTeaServerApp.UnitTests.Features.EmployeeModule.Commands;
@@ -58,3 +58,4 @@ public class DeleteEmployeeCommandHandlerTests
             .WithMessage("*999*");
     }
 }
+
