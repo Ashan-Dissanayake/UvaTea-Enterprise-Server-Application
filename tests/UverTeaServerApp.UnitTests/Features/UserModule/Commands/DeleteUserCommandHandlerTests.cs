@@ -4,6 +4,7 @@ using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
 using UverTeaServerApp.src.Feature.UserModule.Commands.DeleteUser;
 using UverTeaServerApp.Shared.Middlewares;
 using UverTeaServerApp.UnitTests.Common;
+using Moq;
 
 namespace UverTeaServerApp.UnitTests.Features.UserModule.Commands;
 
@@ -40,7 +41,9 @@ public class DeleteUserCommandHandlerTests
         context.Users.Add(user);
         await context.SaveChangesAsync();
 
-        var handler = new DeleteUserCommandHandler(context);
+        var unitOfWork = TestDbContextFactory.CreateUnitOfWork(context);
+
+        var handler = new DeleteUserCommandHandler(context, unitOfWork);
         var command = new DeleteUserCommand(user.Id);
 
         // Act
@@ -58,7 +61,9 @@ public class DeleteUserCommandHandlerTests
     {
         // Arrange
         using var context = TestDbContextFactory.Create();
-        var handler = new DeleteUserCommandHandler(context);
+        
+        var mockUnitOfWork = new Mock<Shared.Data.IUnitOfWork>();
+        var handler = new DeleteUserCommandHandler(context,mockUnitOfWork.Object);
         var command = new DeleteUserCommand(999);
 
         // Act

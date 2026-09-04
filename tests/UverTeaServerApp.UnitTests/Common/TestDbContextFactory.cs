@@ -15,5 +15,10 @@ public static class TestDbContextFactory
         context.Database.EnsureCreated();
         return context;
     }
+
+    public static IUnitOfWork CreateUnitOfWork(UvaTeaDbContext context)
+    {
+        return new UnitOfWork(context);
+    }
 }
 

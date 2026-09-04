@@ -3,6 +3,7 @@ using UverTeaServerApp.src.Feature.EmployeeModule.Commands.UpdateEmployee;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
 using UverTeaServerApp.Shared.Middlewares;
 using UverTeaServerApp.UnitTests.Common;
+using Moq;
 
 namespace UverTeaServerApp.UnitTests.Features.EmployeeModule.Commands;
 
@@ -29,12 +30,15 @@ public class UpdateEmployeeCommandHandlerTests
         context.Employees.Add(employee);
         await context.SaveChangesAsync();
 
-        var handler = new UpdateEmployeeCommandHandler(context);
+        var mockUnitOfWork = new Mock<Shared.Data.IUnitOfWork>();
+
+        var handler = new UpdateEmployeeCommandHandler(context,mockUnitOfWork.Object);
         var command = new UpdateEmployeeCommand(
             Id: employee.Id,
             Number: "E003",
             Fullname: "Updated Name",
             Callingname: "Updated",
+            Email: "updated@example.com",
             Nic: "912345678V",
             Mobile: "0777777777",
             Land: null,
@@ -64,13 +68,16 @@ public class UpdateEmployeeCommandHandlerTests
     {
         // Arrange
         using var context = TestDbContextFactory.Create();
-        var handler = new UpdateEmployeeCommandHandler(context);
+        var mockUnitOfWork = new Mock<Shared.Data.IUnitOfWork>();
+
+        var handler = new UpdateEmployeeCommandHandler(context,mockUnitOfWork.Object);
         var command = new UpdateEmployeeCommand(
             Id: 999,
             Number: "E999",
             Fullname: "Ghost",
             Callingname: null,
             Nic: "999999999V",
+            Email: "ghost@example.com",
             Mobile: null,
             Land: null,
             Address: null,

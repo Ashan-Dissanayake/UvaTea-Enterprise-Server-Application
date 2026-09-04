@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
 using UverTeaServerApp.src.Feature.UserModule.Commands.CreateUser;
 using UverTeaServerApp.UnitTests.Common;
@@ -27,7 +28,12 @@ public class CreateUserCommandHandlerTests
         context.Employees.Add(employee);
         await context.SaveChangesAsync();
 
-        var handler = new CreateUserCommandHandler(context);
+        var mockUnitOfWork = new Mock<Shared.Data.IUnitOfWork>();
+        mockUnitOfWork
+            .Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .Returns((CancellationToken ct) => context.SaveChangesAsync(ct));
+
+        var handler = new CreateUserCommandHandler(context,mockUnitOfWork.Object);
         var command = new CreateUserCommand(
             Username: "admin_user",
             Password: "SecurePassword123!",

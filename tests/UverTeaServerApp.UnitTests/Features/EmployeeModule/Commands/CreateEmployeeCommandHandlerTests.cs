@@ -1,6 +1,9 @@
 using FluentAssertions;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using UverTeaServerApp.EmployeeModule.Commands.CreateEmployee;
+using UverTeaServerApp.Shared.Data;
 using UverTeaServerApp.UnitTests.Common;
 
 namespace UverTeaServerApp.UnitTests.Features.EmployeeModule.Commands;
@@ -14,7 +17,10 @@ public class CreateEmployeeCommandHandlerTests
         using var context = TestDbContextFactory.Create();
         MockDataGenerator.SeedMasterData(context);
 
-        var handler = new CreateEmployeeCommandHandler(context);
+        var unitOfWork = TestDbContextFactory.CreateUnitOfWork(context);
+        var mockPublisher = new Mock<IPublisher>();
+
+        var handler = new CreateEmployeeCommandHandler(context, unitOfWork, mockPublisher.Object);
         var command = new CreateEmployeeCommand(
             Number: "E001",
             Fullname: "John Doe",
@@ -23,6 +29,7 @@ public class CreateEmployeeCommandHandlerTests
             Mobile: "0771234567",
             Land: "0112345678",
             Address: "123 Tea Estate Road, Badulla",
+            Email: "john.doe@example.com",
             Dobirth: new DateOnly(1990, 1, 1),
             Doassignment: new DateOnly(2020, 1, 1),
             GenderId: 1,

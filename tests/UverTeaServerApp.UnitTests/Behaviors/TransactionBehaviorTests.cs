@@ -9,7 +9,7 @@ namespace UverTeaServerApp.UnitTests.Behaviors;
 
 public class TransactionBehaviorTests
 {
-    public record SampleCommand(string Value) : IRequest<string>;
+    public record SampleCommand(string Value) : IRequest<string>, ITransactionalRequest;
     public record SampleQuery(string Value) : IRequest<string>;
 
     private readonly Mock<IUnitOfWork> _uowMock;
