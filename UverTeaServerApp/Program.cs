@@ -11,11 +11,21 @@ using UverTeaServerApp.Shared.Hubs;
 using UverTeaServerApp.Shared.Middlewares;
 using UverTeaServerApp.Shared.Security;
 using UverTeaServerApp.Shared.Services;
+using Scalar.AspNetCore;
 using UverTeaServerApp.src.Feature.EmployeeModule.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        document.Info.Title = "UvaTea Enterprise Platform API";
+        document.Info.Version = "v1";
+        document.Info.Description = "Production RESTful API for Uva Tea Factory Operations (Manufacturing, Harvesting, Agronomy, and Distribution).";
+        return Task.CompletedTask;
+    });
+});
 
 builder.Services.AddSingleton<AuditableEntityInterceptor>();
 
@@ -124,6 +134,11 @@ app.UseExceptionHandler();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference(options =>
+    {
+        options.Title = "UvaTea Enterprise API Reference";
+        options.Theme = Scalar.AspNetCore.ScalarTheme.DeepSpace;
+    });
 }
 
 app.UseHttpsRedirection();

@@ -11,8 +11,12 @@ using UverTeaServerApp.src.Feature.UserModule.Queries.GetUsers;
 
 namespace UverTeaServerApp.src.Feature.UserModule.Controllers;
 
+/// <summary>
+/// Endpoints for managing user accounts, credential assignments, and RBAC roles.
+/// </summary>
 [ApiController]
 [Route("api/users")]
+[Tags("Users & RBAC")]
 public class UserController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -24,10 +28,11 @@ public class UserController : ControllerBase
 
     /// <summary>
     /// Returns paginated users with their Role and Employee details.
-    /// GET /api/users
     /// </summary>
     [HttpGet]
     [Authorize]
+    [ProducesResponseType(typeof(PagedResult<UserDetailResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<PagedResult<UserDetailResponseDto>>> GetUsers(
         [FromQuery] PaginationParams paginationParams)
     {
@@ -37,10 +42,12 @@ public class UserController : ControllerBase
 
     /// <summary>
     /// Returns a single user by ID.
-    /// GET /api/users/{id}
     /// </summary>
     [HttpGet("{id:int}")]
     [Authorize]
+    [ProducesResponseType(typeof(UserDetailResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<UserDetailResponseDto>> GetUserById(int id)
     {
         var result = await _mediator.Send(new GetUserByIdQuery(id));
@@ -48,11 +55,14 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
-    /// Registers a new application user (public — no token required).
-    /// POST /api/users/register
+    /// Registers a new application user (Requires Admin role).
     /// </summary>
     [Authorize(Roles = "Admin")]
     [HttpPost("register")]
+    [ProducesResponseType(typeof(UserDetailResponseDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<UserDetailResponseDto>> RegisterUser(
         [FromBody] CreateUserCommand command)
     {
@@ -62,10 +72,14 @@ public class UserController : ControllerBase
 
     /// <summary>
     /// Updates an existing user's details (username, role, status, optional password re-hash).
-    /// PUT /api/users/{id}
     /// </summary>
     [HttpPut("{id:int}")]
     [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(UserDetailResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<UserDetailResponseDto>> UpdateUser(
         int id, [FromBody] UpdateUserCommand command)
     {
@@ -80,11 +94,13 @@ public class UserController : ControllerBase
 
     /// <summary>
     /// Deletes a user by ID.
-    /// DELETE /api/users/{id}
     /// </summary>
     [Authorize(Roles = "Admin")]
     [HttpDelete("{id:int}")]
-    
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteUser(int id)
     {
         await _mediator.Send(new DeleteUserCommand(id));
