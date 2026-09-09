@@ -1,6 +1,16 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using UverTeaServerApp.src.Feature.AreaModule.Models.Entities;
+using UverTeaServerApp.src.Feature.DistributerModule.Models.Entities;
+using UverTeaServerApp.src.Feature.FertilizerDistributionModule.Models.Entities;
+using UverTeaServerApp.src.Feature.FertilizerModule.Models.Entities;
+using UverTeaServerApp.src.Feature.InvoiceModule.Models.Entities;
+using UverTeaServerApp.src.Feature.OrderModule.Models.Entities;
+using UverTeaServerApp.src.Feature.PluckingModule.Models.Entities;
+using UverTeaServerApp.src.Feature.ProductionModule.Models.Entities;
+using UverTeaServerApp.src.Feature.ProductionOrderModule.Models.Entities;
+using UverTeaServerApp.src.Feature.UserModule.Models.Entities;
 
 namespace UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
 

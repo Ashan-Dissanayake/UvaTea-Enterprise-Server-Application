@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
+using UverTeaServerApp.src.Feature.UserModule.Models.Entities;
 
 namespace UverTeaServerApp.Shared.Security;
 

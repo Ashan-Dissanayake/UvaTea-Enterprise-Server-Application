@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
+using UverTeaServerApp.src.Feature.UserModule.Models.Entities;
 
 namespace UverTeaServerApp.src.Feature.UserModule.Models.Configurations;
 

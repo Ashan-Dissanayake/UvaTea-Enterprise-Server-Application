@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using UverTeaServerApp.Shared.Entities;
+using UverTeaServerApp.src.Feature.AreaModule.Models.Entities;
+using UverTeaServerApp.src.Feature.PluckingModule.Models.Entities;
+using UverTeaServerApp.src.Feature.UserModule.Models.Entities;
 
 namespace UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
 

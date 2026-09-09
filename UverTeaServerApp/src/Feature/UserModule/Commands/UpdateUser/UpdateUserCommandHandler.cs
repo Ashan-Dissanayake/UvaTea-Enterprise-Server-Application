@@ -6,6 +6,7 @@ using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
 using UverTeaServerApp.src.Feature.UserModule.Models.Dtos;
 using UverTeaServerApp.Shared.Middlewares;
 using Mapster;
+using UverTeaServerApp.src.Feature.UserModule.Models.Entities;
 
 namespace UverTeaServerApp.src.Feature.UserModule.Commands.UpdateUser;
 

@@ -5,6 +5,7 @@ using UverTeaServerApp.src.Feature.UserModule.Commands.DeleteUser;
 using UverTeaServerApp.Shared.Middlewares;
 using UverTeaServerApp.UnitTests.Common;
 using Moq;
+using UverTeaServerApp.src.Feature.UserModule.Models.Entities;
 
 namespace UverTeaServerApp.UnitTests.Features.UserModule.Commands;
 

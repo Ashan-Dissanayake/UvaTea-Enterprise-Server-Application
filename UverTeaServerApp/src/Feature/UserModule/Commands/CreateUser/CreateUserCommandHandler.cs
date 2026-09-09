@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using UverTeaServerApp.Shared.Data;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
 using UverTeaServerApp.src.Feature.UserModule.Models.Dtos;
+using UverTeaServerApp.src.Feature.UserModule.Models.Entities;
 
 namespace UverTeaServerApp.src.Feature.UserModule.Commands.CreateUser;
 
