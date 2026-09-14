@@ -10,4 +10,8 @@ public partial class Areastatus
     public string? Name { get; set; }
 
     public virtual ICollection<Area> Areas { get; set; } = new List<Area>();
+
+    public virtual ICollection<Areastatushistory> Areastatushistoryfrom_statuses { get; set; } = new List<Areastatushistory>();
+
+    public virtual ICollection<Areastatushistory> Areastatushistoryto_statuses { get; set; } = new List<Areastatushistory>();
 }

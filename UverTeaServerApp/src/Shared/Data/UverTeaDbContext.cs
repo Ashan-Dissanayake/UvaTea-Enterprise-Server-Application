@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using UverTeaServerApp.Shared.Entities;
+using UverTeaServerApp.src.Feature.AreaModule.Models.Entities;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
 using UverTeaServerApp.src.Feature.UserModule.Models.Entities;
 
@@ -9,57 +10,93 @@ namespace UverTeaServerApp.Shared.Data;
 
 public class UvaTeaDbContext : DbContext
 {
-    public UvaTeaDbContext(DbContextOptions<UvaTeaDbContext> options) : base(options) 
-    { 
+    public UvaTeaDbContext(DbContextOptions<UvaTeaDbContext> options)
+        : base(options)
+    {
     }
+
+    // =========================================================
+    // Employee
+    // =========================================================
 
     public DbSet<Employee> Employees { get; set; }
     public DbSet<Employeestatus> EmployeeStatuses { get; set; }
     public DbSet<Gender> Genders { get; set; }
     public DbSet<Designation> Designations { get; set; }
+
+    // =========================================================
+    // User
+    // =========================================================
+
     public DbSet<Userstatus> Userstatuses { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<User> Users { get; set; }
 
+    // =========================================================
+    // Area
+    // =========================================================
+
+    public DbSet<Areastatus> Areastatuses { get; set; }
+    public DbSet<Areacategory> Areacategories { get; set; }
+    public DbSet<Area> Areas { get; set; }
+    public DbSet<Growthstage> Growthstages { get; set; }
+    public DbSet<Plantingconfiguration> Plantingconfigurations { get; set; }
+    public DbSet<Areagrowthstagehistory> Areagrowthstagehistories { get; set; }
+    public DbSet<Areastatushistory> Areastatushistories { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
-        modelBuilder.Entity<Employee>().ToTable("employee", "uvateafactory");
-        modelBuilder.Entity<Employeestatus>().ToTable("employeestatus", "uvateafactory");
-        modelBuilder.Entity<Gender>().ToTable("gender", "uvateafactory");
-        modelBuilder.Entity<Designation>().ToTable("designation", "uvateafactory");
-        modelBuilder.Entity<Userstatus>().ToTable("userstatus", "uvateafactory");
-        modelBuilder.Entity<Role>().ToTable("role", "uvateafactory");
-        modelBuilder.Entity<User>().ToTable("user", "uvateafactory");
 
-        // Explicit isdeleted column mapping and Global Query Filters
-        modelBuilder.Entity<Employee>().Property(e => e.IsDeleted).HasColumnName("isdeleted");
-        modelBuilder.Entity<Employee>().HasQueryFilter(e => !e.IsDeleted);
+        // =========================================================
+        // Global Soft Delete Configuration
+        // =========================================================
 
-        modelBuilder.Entity<User>().Property(u => u.IsDeleted).HasColumnName("isdeleted");
-        modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsDeleted);
-
-        // Dynamic Global Query Filters and column mapping for all ISoftDeletable entities
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            if (typeof(ISoftDeletable).IsAssignableFrom(entityType.ClrType))
+            if (!typeof(ISoftDeletable)
+                .IsAssignableFrom(entityType.ClrType))
             {
-                modelBuilder.Entity(entityType.ClrType)
-                    .Property(nameof(ISoftDeletable.IsDeleted))
-                    .HasColumnName("isdeleted");
-
-                var parameter = Expression.Parameter(entityType.ClrType, "e");
-                var propertyMethodInfo = typeof(EF).GetMethod(nameof(EF.Property), BindingFlags.Static | BindingFlags.Public)
-                    ?.MakeGenericMethod(typeof(bool));
-                var isDeletedProperty = Expression.Call(propertyMethodInfo!, parameter, Expression.Constant(nameof(ISoftDeletable.IsDeleted)));
-                var compareExpression = Expression.MakeBinary(ExpressionType.Equal, isDeletedProperty, Expression.Constant(false));
-                var lambda = Expression.Lambda(compareExpression, parameter);
-
-                modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
+                continue;
             }
+
+            modelBuilder.Entity(entityType.ClrType)
+                .Property(nameof(ISoftDeletable.IsDeleted))
+                .HasColumnName("isdeleted");
+
+            var parameter = Expression.Parameter(
+                entityType.ClrType,
+                "e");
+
+            var propertyMethodInfo = typeof(EF)
+                .GetMethod(
+                    nameof(EF.Property),
+                    BindingFlags.Static | BindingFlags.Public)
+                ?.MakeGenericMethod(typeof(bool));
+
+            var isDeletedProperty = Expression.Call(
+                propertyMethodInfo!,
+                parameter,
+                Expression.Constant(
+                    nameof(ISoftDeletable.IsDeleted)));
+
+            var compareExpression = Expression.Equal(
+                isDeletedProperty,
+                Expression.Constant(false));
+
+            var lambda = Expression.Lambda(
+                compareExpression,
+                parameter);
+
+            modelBuilder.Entity(entityType.ClrType)
+                .HasQueryFilter(lambda);
         }
 
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(UvaTeaDbContext).Assembly);
+        // =========================================================
+        // Entity Configurations
+        // =========================================================
+
+        modelBuilder.ApplyConfigurationsFromAssembly(
+            typeof(UvaTeaDbContext).Assembly);
     }
 }

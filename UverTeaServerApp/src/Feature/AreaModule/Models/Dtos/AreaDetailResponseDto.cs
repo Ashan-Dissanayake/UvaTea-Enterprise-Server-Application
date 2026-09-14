@@ -11,5 +11,7 @@ public record AreaDetailResponseDto(
     DateOnly? Doproofing,
     EmployeeSummaryDto? Supervisor,
     AreaStatusDto Areastatus,
-    AreaCategoryDto Areacategory
+    AreaCategoryDto Areacategory,
+    GrowthStageDto? Growthstage,
+    PlantingConfigurationDto? Plantingconfiguration
 );

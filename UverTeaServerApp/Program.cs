@@ -4,6 +4,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
 using UverTeaServerApp.Shared.Behaviors;
 using UverTeaServerApp.Shared.Caching;
 using UverTeaServerApp.Shared.Data;
@@ -11,7 +12,6 @@ using UverTeaServerApp.Shared.Hubs;
 using UverTeaServerApp.Shared.Middlewares;
 using UverTeaServerApp.Shared.Security;
 using UverTeaServerApp.Shared.Services;
-using Scalar.AspNetCore;
 using UverTeaServerApp.src.Feature.EmployeeModule.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,44 +22,90 @@ builder.Services.AddOpenApi(options =>
     {
         document.Info.Title = "UvaTea Enterprise Platform API";
         document.Info.Version = "v1";
-        document.Info.Description = "Production RESTful API for Uva Tea Factory Operations (Manufacturing, Harvesting, Agronomy, and Distribution).";
+        document.Info.Description =
+            "Production RESTful API for Uva Tea Factory Operations " +
+            "(Manufacturing, Harvesting, Agronomy, and Distribution).";
+
         return Task.CompletedTask;
     });
 });
 
 builder.Services.AddSingleton<AuditableEntityInterceptor>();
 
-// 1. Register Database Context
+// ============================================================
+// DATABASE
+// ============================================================
+
 builder.Services.AddDbContext<UvaTeaDbContext>((sp, options) =>
 {
-    var interceptor = sp.GetRequiredService<AuditableEntityInterceptor>();
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-           .AddInterceptors(interceptor);
+    var interceptor =
+        sp.GetRequiredService<AuditableEntityInterceptor>();
+
+    options.UseSqlServer(
+            builder.Configuration.GetConnectionString("DefaultConnection"))
+        .AddInterceptors(interceptor);
 });
 
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<UvaTeaDbContext>("Database");
 
-// 2. Register Redis Distributed Cache & CacheService
+// ============================================================
+// REDIS CACHE
+// ============================================================
+
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.Configuration =
+        builder.Configuration.GetConnectionString("Redis");
 });
+
 builder.Services.AddScoped<ICacheService, CacheService>();
 
-// 3. Register Services, MediatR, and Validators 
+// ============================================================
+// APPLICATION SERVICES
+// ============================================================
+
 builder.Services.AddScoped<EmployeeLookupService>();
+
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// ============================================================
+// HTTP CONTEXT / CURRENT USER
+// ============================================================
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<ICurrentUser, CurrentUser>();
+
+// ============================================================
+// JWT CONFIGURATION
+// ============================================================
+
+var jwtSettings =
+    builder.Configuration
+        .GetSection(JwtSettings.SectionName)
+        .Get<JwtSettings>()
+    ?? throw new InvalidOperationException(
+        "JwtSettings is not configured in appsettings.json.");
+
+builder.Services.Configure<JwtSettings>(
+    builder.Configuration.GetSection(JwtSettings.SectionName));
+
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
-// 4. JWT Authentication & Authorization Configuration
-var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
-                  ?? throw new InvalidOperationException("JwtSettings is not configured in appsettings.json.");
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
+// ============================================================
+// AUTHENTICATION & AUTHORIZATION
+// ============================================================
 
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme =
+        JwtBearerDefaults.AuthenticationScheme;
+
+    options.DefaultChallengeScheme =
+        JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
 {
@@ -69,95 +115,143 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
+
         ValidIssuer = jwtSettings.Issuer,
         ValidAudience = jwtSettings.Audience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
+
+        IssuerSigningKey =
+            new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtSettings.Secret)),
+
         ClockSkew = TimeSpan.Zero
     };
 });
 
 builder.Services.AddAuthorization();
 
-// Register MediatR along with Pipeline Behaviors
-builder.Services.AddMediatR(cfg => {
+// ============================================================
+// MEDIATR & PIPELINE BEHAVIORS
+// ============================================================
+
+builder.Services.AddMediatR(cfg =>
+{
     cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+
     cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
     cfg.AddOpenBehavior(typeof(CachingBehavior<,>));
     cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
     cfg.AddOpenBehavior(typeof(TransactionBehavior<,>));
 });
 
-// Register FluentValidation Validators 
-builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+// ============================================================
+// FLUENT VALIDATION
+// ============================================================
+
+builder.Services.AddValidatorsFromAssembly(
+    typeof(Program).Assembly);
+
+// ============================================================
+// MVC / CONTROLLERS
+// ============================================================
 
 builder.Services.AddControllers();
+
+// ============================================================
+// EXCEPTION HANDLING
+// ============================================================
+
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
+// ============================================================
+// RATE LIMITING
+// ============================================================
+
 builder.Services.AddRateLimiter(options =>
 {
-    // Configure Global Rate Limiter Policy
-    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
-        RateLimitPartition.GetFixedWindowLimiter(
-            partitionKey: httpContext.User.Identity?.Name ?? httpContext.Request.Headers.Host.ToString(),
-            factory: partition => new FixedWindowRateLimiterOptions
-            {
-                AutoReplenishment = true,
-                PermitLimit = 100,            // Max 100 requests per minute
-                QueueLimit = 2,
-                Window = TimeSpan.FromMinutes(1)
-            }));
+    options.GlobalLimiter =
+        PartitionedRateLimiter.Create<HttpContext, string>(
+            httpContext =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey:
+                        httpContext.User.Identity?.Name
+                        ?? httpContext.Request.Headers.Host.ToString(),
 
-    // Custom response when Rate Limit is exceeded
-    options.OnRejected = async (context, cancellationToken) =>
+                    factory: partition =>
+                        new FixedWindowRateLimiterOptions
+                        {
+                            AutoReplenishment = true,
+                            PermitLimit = 100,
+                            QueueLimit = 2,
+                            Window = TimeSpan.FromMinutes(1)
+                        }));
+
+    options.OnRejected = async (
+        context,
+        cancellationToken) =>
     {
-        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
-        context.HttpContext.Response.ContentType = "application/json";
+        context.HttpContext.Response.StatusCode =
+            StatusCodes.Status429TooManyRequests;
+
+        context.HttpContext.Response.ContentType =
+            "application/json";
+
         await context.HttpContext.Response.WriteAsync(
-            "{\"error\": \"Too many requests. Please try again later.\"}", cancellationToken);
+            "{\"error\": \"Too many requests. Please try again later.\"}",
+            cancellationToken);
     };
 });
 
-// Register Application Services & SignalR before building the container
-builder.Services.AddScoped<IEmailService, EmailService>();
+// ============================================================
+// SIGNALR
+// ============================================================
+
 builder.Services.AddSignalR();
 
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+// ============================================================
+// BUILD APPLICATION
+// ============================================================
 
-
-// --- BUILD APPLICATION ---
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// ============================================================
+// HTTP REQUEST PIPELINE
+// ============================================================
+
 app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+
     app.MapScalarApiReference(options =>
     {
         options.Title = "UvaTea Enterprise API Reference";
-        options.Theme = Scalar.AspNetCore.ScalarTheme.DeepSpace;
+        options.Theme =
+            Scalar.AspNetCore.ScalarTheme.DeepSpace;
     });
 }
 
 app.UseHttpsRedirection();
 
-// Rate Limiter Middleware
+// Rate Limiter
 app.UseRateLimiter();
 
-// Authentication and Authorization Middlewares (Must be placed before MapControllers)
+// Authentication MUST come before Authorization
 app.UseAuthentication();
+
 app.UseAuthorization();
 
-// Health Check Endpoint Mapping (Excluded from Rate Limiting)
-app.MapHealthChecks("/health")
-   .DisableRateLimiting();
+// ============================================================
+// ENDPOINTS
+// ============================================================
 
-// Controllers Mapping
+app.MapHealthChecks("/health")
+    .DisableRateLimiting();
+
 app.MapControllers();
 
-// SignalR Hub Mapping
-app.MapHub<NotificationHub>("/hubs/notification");
+app.MapHub<NotificationHub>(
+    "/hubs/notification");
 
 app.Run();
