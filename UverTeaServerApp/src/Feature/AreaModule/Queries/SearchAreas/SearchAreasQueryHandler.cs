@@ -24,8 +24,8 @@ public class SearchAreasQueryHandler
     {
         var query = _context.Areas
             .AsNoTracking()
-            .Include(e => e.Areastatus)
-            .Include(e => e.Areacategory)
+            .Include(e => e.AreaStatus)
+            .Include(e => e.AreaCategory)
             .Include(e => e.Supervisor)
             .AsQueryable();
 
@@ -42,19 +42,19 @@ public class SearchAreasQueryHandler
             if (paramsDict.TryGetValue("areastatusid", out var areastatusid) &&
                 int.TryParse(areastatusid, out int sId))
             {
-                query = query.Where(e => e.AreastatusId == sId);
+                query = query.Where(e => e.AreaStatusId == sId);
             }
 
             if (paramsDict.TryGetValue("areacategoryid", out var areacategoryid) &&
                 int.TryParse(areacategoryid, out int cId))
             {
-                query = query.Where(e => e.AreacategoryId == cId);
+                query = query.Where(e => e.AreaCategoryId == cId);
             }
 
             if (paramsDict.TryGetValue("plantcount", out var plantcount) &&
                 int.TryParse(plantcount, out int pCount))
             {
-                query = query.Where(e => e.Plantcount == pCount);
+                query = query.Where(e => e.PlantCount == pCount);
             }
         }
 
