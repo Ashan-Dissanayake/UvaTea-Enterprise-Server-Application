@@ -50,6 +50,10 @@ public class UpdateAreaCommandValidator : AbstractValidator<UpdateAreaCommand>
             .WithMessage(
                 "Plant count exceeds the calculated capacity " +
                 "for the selected area and planting configuration.");
+
+        RuleFor(x => x.RowVersion)
+            .NotEmpty()
+            .WithMessage("Row version is required.");
     }
 
     private async Task<bool> AreaExistsAndIsActive(

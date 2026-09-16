@@ -92,5 +92,9 @@ public class AreaConfiguration : IEntityTypeConfiguration<Area>
             .WithMany(p => p.Areas)
             .HasForeignKey(a => a.PlantingConfigurationId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Property(a => a.RowVersion)
+            .HasColumnName("rowversion")
+            .IsRowVersion();
     }
 }

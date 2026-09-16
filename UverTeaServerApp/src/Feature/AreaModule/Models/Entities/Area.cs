@@ -46,4 +46,6 @@ public partial class Area
     public virtual Employee? Supervisor { get; set; }
 
     public virtual User User { get; set; } = null!;
+
+    public byte[] RowVersion { get; set; } = [];
 }

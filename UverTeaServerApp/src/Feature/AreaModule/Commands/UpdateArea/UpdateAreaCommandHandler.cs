@@ -2,11 +2,13 @@ using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using UverTeaServerApp.Shared.Data;
+using UverTeaServerApp.Shared.Middlewares;
 using UverTeaServerApp.src.Feature.AreaModule.Models.Dtos;
 
 namespace UverTeaServerApp.AreaModule.Commands.UpdateArea;
 
-public class UpdateAreaCommandHandler : IRequestHandler<UpdateAreaCommand, AreaDetailResponseDto>
+public class UpdateAreaCommandHandler
+    : IRequestHandler<UpdateAreaCommand, AreaDetailResponseDto>
 {
     private readonly UvaTeaDbContext _context;
     private readonly IUnitOfWork _unitOfWork;
@@ -30,9 +32,21 @@ public class UpdateAreaCommandHandler : IRequestHandler<UpdateAreaCommand, AreaD
 
         if (area == null)
         {
-            throw new KeyNotFoundException(
+            throw new ResourceNotFoundException(
                 $"Area with ID '{request.Id}' not found.");
         }
+
+        /*
+         * Tell EF Core which rowversion the client originally read.
+         *
+         * EF will use this value in the UPDATE WHERE clause:
+         *
+         * WHERE id = @id
+         * AND rowversion = @originalRowVersion
+         */
+        _context.Entry(area)
+            .Property(a => a.RowVersion)
+            .OriginalValue = request.RowVersion;
 
         area.Acres = request.Acres;
         area.PlantCount = request.Plantcount;
@@ -40,11 +54,9 @@ public class UpdateAreaCommandHandler : IRequestHandler<UpdateAreaCommand, AreaD
         area.DoProofing = request.Doproofing;
         area.SupervisorId = request.SupervisorId;
         area.AreaCategoryId = request.AreacategoryId;
-        area.PlantingConfigurationId =
-            request.PlantingConfigurationId;
+        area.PlantingConfigurationId = request.PlantingConfigurationId;
 
-        await _unitOfWork.SaveChangesAsync(
-            cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         var updatedArea = await _context.Areas
             .AsNoTracking()

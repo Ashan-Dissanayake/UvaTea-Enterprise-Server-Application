@@ -29,6 +29,10 @@ public class ChangeGrowthStageCommandValidator
             .MustAsync(IsValidGrowthStageTransition)
             .WithMessage(
                 "The requested Growth Stage transition is not allowed.");
+
+        RuleFor(x => x.RowVersion)
+                .NotEmpty()
+            .WithMessage("Row version is required.");
     }
 
     private async Task<bool> AreaExistsAndIsActive(

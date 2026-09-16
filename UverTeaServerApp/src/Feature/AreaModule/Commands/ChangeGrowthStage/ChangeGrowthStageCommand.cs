@@ -25,6 +25,8 @@ public record ChangeGrowthStageCommand(
         255,
         ErrorMessage = "Reason cannot exceed 255 characters."
     )]
-    string? Reason
+    string? Reason,
+    
+    byte[] RowVersion
 
 ) : IRequest<AreaDetailResponseDto>, ITransactionalRequest;

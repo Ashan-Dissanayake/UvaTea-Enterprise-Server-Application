@@ -8,6 +8,10 @@ using UverTeaServerApp.src.Feature.AreaModule.Queries.GetAllAreas;
 using UverTeaServerApp.Shared.Common;
 using UverTeaServerApp.src.Feature.AreaModule.Queries.SeachAreas;
 using UverTeaServerApp.AreaModule.Commands.ChangeGrowthStage;
+using UverTeaServerApp.src.Feature.AreaModule.Commands.DecommissionArea;
+using UverTeaServerApp.src.Feature.AreaModule.Commands.DeactivatePlantingConfiguration;
+using UverTeaServerApp.src.Feature.AreaModule.Queries.GetGrowthStageHistory;
+using UverTeaServerApp.src.Feature.AreaModule.Queries.GetStatusHistory;
 
 namespace UverTeaServerApp.src.Feature.AreaModule.Controllers;
 
@@ -188,7 +192,7 @@ public class AreaController : ControllerBase
     /// </response>
     [Authorize]
     [HttpPut("{id}/growth-stage")]
-    [ProducesResponseType( typeof(AreaDetailResponseDto),StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(AreaDetailResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -202,6 +206,80 @@ public class AreaController : ControllerBase
         }
 
         var result = await _mediator.Send(command);
+
+        return Ok(result);
+    }
+
+
+    /// <summary>
+    /// Decommissions an active area.
+    /// </summary>
+    /// <param name="id">Area ID</param>
+    /// <param name="command">Decommission details</param>
+    /// <response code="200">Area successfully decommissioned</response>
+    /// <response code="400">Invalid ID or validation error</response>
+    /// <response code="401">Unauthorized</response>
+    /// <response code="404">Area or decommissioned status not found</response>
+    [Authorize]
+    [HttpPut("{id}/decommission")]
+    [ProducesResponseType(typeof(AreaDetailResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<AreaDetailResponseDto>> DecommissionArea(int id, [FromBody] DecommissionAreaCommand command)
+    {
+        if (id != command.AreaId)
+        {
+            return BadRequest("ID mismatch between URL and body.");
+        }
+
+        var result = await _mediator.Send(command);
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Returns the growth stage history of an area.
+    /// </summary>
+    /// <param name="id">Area ID</param>
+    /// <response code="200">Growth stage history retrieved successfully</response>
+    /// <response code="401">Unauthorized</response>
+    /// <response code="404">Area not found</response>
+    [Authorize]
+    [HttpGet("{id}/growth-stage-history")]
+    [ProducesResponseType(
+        typeof(List<AreaGrowthStageHistoryResponseDto>),
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<List<AreaGrowthStageHistoryResponseDto>>>
+        GetGrowthStageHistory(int id)
+    {
+        var result = await _mediator.Send(
+            new GetGrowthStageHistoryQuery(id));
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Returns the status history of an area.
+    /// </summary>
+    /// <param name="id">Area ID</param>
+    /// <response code="200">Status history retrieved successfully</response>
+    /// <response code="401">Unauthorized</response>
+    /// <response code="404">Area not found</response>
+    [Authorize]
+    [HttpGet("{id}/status-history")]
+    [ProducesResponseType(
+        typeof(List<AreaStatusHistoryResponseDto>),
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<List<AreaStatusHistoryResponseDto>>>
+        GetStatusHistory(int id)
+    {
+        var result = await _mediator.Send(
+            new GetStatusHistoryQuery(id));
 
         return Ok(result);
     }

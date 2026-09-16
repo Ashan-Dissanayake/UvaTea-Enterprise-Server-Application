@@ -7,16 +7,16 @@ using UverTeaServerApp.Shared.Security;
 using UverTeaServerApp.src.Feature.AreaModule.Models.Dtos;
 using UverTeaServerApp.src.Feature.AreaModule.Models.Entities;
 
-namespace UverTeaServerApp.AreaModule.Commands.ChangeGrowthStage;
+namespace UverTeaServerApp.src.Feature.AreaModule.Commands.DecommissionArea;
 
-public class ChangeGrowthStageCommandHandler
-    : IRequestHandler<ChangeGrowthStageCommand, AreaDetailResponseDto>
+public class DecommissionAreaCommandHandler
+    : IRequestHandler<DecommissionAreaCommand, AreaDetailResponseDto>
 {
     private readonly UvaTeaDbContext _context;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUser _currentUser;
 
-    public ChangeGrowthStageCommandHandler(
+    public DecommissionAreaCommandHandler(
         UvaTeaDbContext context,
         IUnitOfWork unitOfWork,
         ICurrentUser currentUser)
@@ -27,7 +27,7 @@ public class ChangeGrowthStageCommandHandler
     }
 
     public async Task<AreaDetailResponseDto> Handle(
-        ChangeGrowthStageCommand request,
+        DecommissionAreaCommand request,
         CancellationToken cancellationToken)
     {
         var area = await _context.Areas
@@ -41,20 +41,17 @@ public class ChangeGrowthStageCommandHandler
                 $"Area with ID '{request.AreaId}' not found.");
         }
 
-        var currentGrowthStageId = area.GrowthStageId
-            ?? throw new InvalidOperationException(
-                "The area does not have a current Growth Stage.");
+        var currentStatusId = area.AreaStatusId;
 
-        var requestedGrowthStage = await _context.Growthstages
+        var decommissionedStatus = await _context.Areastatuses
             .SingleOrDefaultAsync(
-                g => g.Id == request.GrowthStageId &&
-                     g.Isactive,
+                s => s.Name == "Decommissioned",
                 cancellationToken);
 
-        if (requestedGrowthStage == null)
+        if (decommissionedStatus == null)
         {
             throw new ResourceNotFoundException(
-                $"Growth Stage with ID '{request.GrowthStageId}' not found.");
+                "Decommissioned area status not found.");
         }
 
         /*
@@ -65,13 +62,13 @@ public class ChangeGrowthStageCommandHandler
             .Property(a => a.RowVersion)
             .OriginalValue = request.RowVersion;
 
-        area.GrowthStageId = requestedGrowthStage.Id;
+        area.AreaStatusId = decommissionedStatus.Id;
 
-        var history = new Areagrowthstagehistory
+        var history = new Areastatushistory
         {
             Area_id = area.Id,
-            From_growthstage_id = currentGrowthStageId,
-            To_growthstage_id = requestedGrowthStage.Id,
+            From_status_id = currentStatusId,
+            To_status_id = decommissionedStatus.Id,
             Changedat = DateTime.UtcNow,
             Changedby = _currentUser.UserId,
             Reason = string.IsNullOrWhiteSpace(request.Reason)
@@ -79,7 +76,7 @@ public class ChangeGrowthStageCommandHandler
                 : request.Reason.Trim()
         };
 
-        _context.Areagrowthstagehistories.Add(history);
+        _context.Areastatushistories.Add(history);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

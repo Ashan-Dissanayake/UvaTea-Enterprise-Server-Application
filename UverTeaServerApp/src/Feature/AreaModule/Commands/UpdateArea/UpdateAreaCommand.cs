@@ -52,6 +52,8 @@ public record UpdateAreaCommand(
         int.MaxValue,
         ErrorMessage = "A valid Planting Configuration ID is required."
     )]
-    int PlantingConfigurationId
+    int PlantingConfigurationId,
+
+    byte[] RowVersion
 
 ) : IRequest<AreaDetailResponseDto>, ITransactionalRequest;

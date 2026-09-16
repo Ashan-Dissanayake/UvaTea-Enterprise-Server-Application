@@ -13,5 +13,7 @@ public record AreaDetailResponseDto(
     AreaStatusDto Areastatus,
     AreaCategoryDto Areacategory,
     GrowthStageDto? Growthstage,
-    PlantingConfigurationDto? Plantingconfiguration
+    PlantingConfigurationDto? Plantingconfiguration,
+    byte[] RowVersion
+
 );
