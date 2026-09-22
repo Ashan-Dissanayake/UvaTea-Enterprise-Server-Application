@@ -1,7 +1,7 @@
 # ============================================================
 #  UvaTea Enterprise Server — DEV Branch CI/CD Pipeline
-#  Trigger  : push to 'dev' branch
-#  Flow      : Build → Unit Tests → Docker Push → Deploy (Testing)
+#  Trigger  : push to 'develop' branch
+#  Flow      : Build → Unit Tests → Docker Push (Docker Hub)
 # ============================================================
 
 trigger:
@@ -9,21 +9,19 @@ trigger:
     include:
       - develop
 
-pr: none   # PR builds handled separately
+pr: none
 
 pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  - group: uvatea-testing-vars          # Azure DevOps Library → Variable Group
+  - group: uvatea-testing-vars
   - name: buildConfiguration
     value: 'Release'
   - name: dockerRepository
     value: '$(DOCKER_HUB_USERNAME)/uvatea-api'
   - name: dockerRegistryServiceConnection
-    value: 'docker-hub-connection'       # Azure DevOps Service Connection name
-  - name: imageTag
-    value: 'dev-$(Build.BuildId)'
+    value: 'docker-hub-connection'
 
 # ─────────────────────────────────────────────
 # STAGE 1 — Build & Unit Tests
@@ -71,7 +69,7 @@ stages:
 # STAGE 2 — Docker Build & Push to Docker Hub
 # ─────────────────────────────────────────────
 - stage: DockerBuildPush
-  displayName: '🐋 Docker Build & Push (Testing)'
+  displayName: '🐋 Docker Build & Push'
   dependsOn: BuildAndTest
   condition: succeeded()
   jobs:
@@ -79,7 +77,7 @@ stages:
     displayName: 'Build Image → Push → Docker Hub'
     steps:
     - task: Docker@2
-      displayName: '🐋 Build & Push → dev-$(Build.BuildId)'
+      displayName: '🐋 Build & Push → dev-$(Build.BuildId) + dev-latest'
       inputs:
         command: 'buildAndPush'
         repository: '$(dockerRepository)'
@@ -88,53 +86,3 @@ stages:
         tags: |
           dev-$(Build.BuildId)
           dev-latest
-
-# ─────────────────────────────────────────────
-# STAGE 3 — Deploy to Testing Environment
-# ─────────────────────────────────────────────
-- stage: DeployTesting
-  displayName: '🟡 Deploy → Testing Environment'
-  dependsOn: DockerBuildPush
-  condition: succeeded()
-  jobs:
-  - deployment: DeployToTestingJob
-    displayName: 'Deploy Docker Image to Azure App Service (Dev)'
-    environment: 'uvatea-testing'        # Azure DevOps Environment (for history/tracking)
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: AzureWebAppContainer@1
-            displayName: '🚀 Deploy to Azure App Service (uvatea-api-dev)'
-            inputs:
-              azureSubscription: 'azure-service-connection'   # Azure DevOps Service Connection
-              appName: '$(AZURE_APP_SERVICE_NAME_DEV)'
-              containers: '$(dockerRepository):dev-$(Build.BuildId)'
-
-          # Inject environment variables into Azure App Service
-          - task: AzureAppServiceSettings@1
-            displayName: '⚙️ Configure App Settings (Testing Env Vars)'
-            inputs:
-              azureSubscription: 'azure-service-connection'
-              appName: '$(AZURE_APP_SERVICE_NAME_DEV)'
-              appSettings: |
-                [
-                  { "name": "ASPNETCORE_ENVIRONMENT",             "value": "Testing",                            "slotSetting": false },
-                  { "name": "ConnectionStrings__DefaultConnection","value": "$(DB_CONNECTION_STRING)",            "slotSetting": false },
-                  { "name": "ConnectionStrings__Redis",            "value": "$(REDIS_CONNECTION_STRING)",         "slotSetting": false },
-                  { "name": "JwtSettings__Secret",                 "value": "$(JWT_SECRET)",                      "slotSetting": false },
-                  { "name": "EmailSettings__Password",             "value": "$(EMAIL_PASSWORD)",                  "slotSetting": false }
-                ]
-
-          # Health check after deploy
-          - script: |
-              echo "⏳ Waiting for app to start..."
-              sleep 30
-              STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://$(AZURE_APP_SERVICE_NAME_DEV).azurewebsites.net/health)
-              if [ "$STATUS" = "200" ]; then
-                echo "✅ Health check passed — HTTP $STATUS"
-              else
-                echo "❌ Health check failed — HTTP $STATUS"
-                exit 1
-              fi
-            displayName: '🩺 Health Check'
