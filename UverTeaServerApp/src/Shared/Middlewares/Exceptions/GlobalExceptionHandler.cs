@@ -12,6 +12,18 @@ public class GlobalExceptionHandler : IExceptionHandler
     {
         var (statusCode, title, message) = exception switch
         {
+            UnauthorizedAccessException => (
+                StatusCodes.Status401Unauthorized, 
+                "Unauthorized", 
+                exception.Message
+            ),
+            
+            FluentValidation.ValidationException validationEx => (
+                StatusCodes.Status400BadRequest, 
+                "Validation Error", 
+                string.Join("; ", validationEx.Errors.Select(e => e.ErrorMessage))
+            ),
+
             ResourceNotFoundException => (
                 StatusCodes.Status404NotFound, 
                 "Not Found", 

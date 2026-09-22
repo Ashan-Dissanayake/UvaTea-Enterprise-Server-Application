@@ -1,29 +1,29 @@
 # ============================================================
-#  UvaTea Enterprise Server — DEV Branch CI/CD Pipeline
-#  Trigger  : push to 'dev' branch
-#  Flow      : Build → Unit Tests → Docker Push → Deploy (Testing)
+#  UvaTea Enterprise Server — MASTER Branch CI/CD Pipeline
+#  Trigger  : push/merge to 'master' branch
+#  Flow      : Build → Unit Tests → Docker Push → Approval → Deploy (Production)
 # ============================================================
 
 trigger:
   branches:
     include:
-      - dev
+      - master
 
-pr: none   # PR builds handled separately
+pr: none
 
 pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  - group: uvatea-testing-vars          # Azure DevOps Library → Variable Group
+  - group: uvatea-production-vars        # Azure DevOps Library → Variable Group
   - name: buildConfiguration
     value: 'Release'
   - name: dockerRepository
     value: '$(DOCKER_HUB_USERNAME)/uvatea-api'
   - name: dockerRegistryServiceConnection
-    value: 'docker-hub-connection'       # Azure DevOps Service Connection name
+    value: 'docker-hub-connection'        # Azure DevOps Service Connection name
   - name: imageTag
-    value: 'dev-$(Build.BuildId)'
+    value: '$(Build.BuildId)'
 
 # ─────────────────────────────────────────────
 # STAGE 1 — Build & Unit Tests
@@ -56,7 +56,7 @@ stages:
           --verbosity normal \
           --logger "trx;LogFileName=test-results.trx" \
           --results-directory $(Agent.TempDirectory)/TestResults
-      displayName: '✅ Run Unit Tests'
+      displayName: '✅ Run Unit Tests (Production Gate)'
       workingDirectory: '$(Build.SourcesDirectory)'
 
     - task: PublishTestResults@2
@@ -68,10 +68,10 @@ stages:
         failTaskOnFailedTests: true
 
 # ─────────────────────────────────────────────
-# STAGE 2 — Docker Build & Push to Docker Hub
+# STAGE 2 — Docker Build & Push (Production tag)
 # ─────────────────────────────────────────────
 - stage: DockerBuildPush
-  displayName: '🐋 Docker Build & Push (Testing)'
+  displayName: '🐋 Docker Build & Push (Production)'
   dependsOn: BuildAndTest
   condition: succeeded()
   jobs:
@@ -79,62 +79,71 @@ stages:
     displayName: 'Build Image → Push → Docker Hub'
     steps:
     - task: Docker@2
-      displayName: '🐋 Build & Push → dev-$(Build.BuildId)'
+      displayName: '🐋 Build & Push → $(Build.BuildId) + latest'
       inputs:
         command: 'buildAndPush'
         repository: '$(dockerRepository)'
         dockerfile: 'Dockerfile'
         containerRegistry: '$(dockerRegistryServiceConnection)'
         tags: |
-          dev-$(Build.BuildId)
-          dev-latest
+          $(Build.BuildId)
+          latest
 
 # ─────────────────────────────────────────────
-# STAGE 3 — Deploy to Testing Environment
+# STAGE 3 — Manual Approval Gate
+#   Azure DevOps Environment "uvatea-production"
+#   හි Approvals & Checks configure කරන්න
 # ─────────────────────────────────────────────
-- stage: DeployTesting
-  displayName: '🟡 Deploy → Testing Environment'
+- stage: DeployProduction
+  displayName: '🟢 Deploy → Production Environment'
   dependsOn: DockerBuildPush
   condition: succeeded()
   jobs:
-  - deployment: DeployToTestingJob
-    displayName: 'Deploy Docker Image to Azure App Service (Dev)'
-    environment: 'uvatea-testing'        # Azure DevOps Environment (for history/tracking)
+  - deployment: DeployToProdJob
+    displayName: 'Deploy Docker Image to Azure App Service (Production)'
+    environment: 'uvatea-production'     # ← Approval gate මෙහි configure කෙරේ
     strategy:
       runOnce:
         deploy:
           steps:
           - task: AzureWebAppContainer@1
-            displayName: '🚀 Deploy to Azure App Service (uvatea-api-dev)'
-            inputs:
-              azureSubscription: 'azure-service-connection'   # Azure DevOps Service Connection
-              appName: '$(AZURE_APP_SERVICE_NAME_DEV)'
-              containers: '$(dockerRepository):dev-$(Build.BuildId)'
-
-          # Inject environment variables into Azure App Service
-          - task: AzureAppServiceSettings@1
-            displayName: '⚙️ Configure App Settings (Testing Env Vars)'
+            displayName: '🚀 Deploy to Azure App Service (uvatea-api-prod)'
             inputs:
               azureSubscription: 'azure-service-connection'
-              appName: '$(AZURE_APP_SERVICE_NAME_DEV)'
+              appName: '$(AZURE_APP_SERVICE_NAME_PROD)'
+              containers: '$(dockerRepository):$(Build.BuildId)'
+
+          # Inject production environment variables
+          - task: AzureAppServiceSettings@1
+            displayName: '⚙️ Configure App Settings (Production Env Vars)'
+            inputs:
+              azureSubscription: 'azure-service-connection'
+              appName: '$(AZURE_APP_SERVICE_NAME_PROD)'
               appSettings: |
                 [
-                  { "name": "ASPNETCORE_ENVIRONMENT",             "value": "Testing",                            "slotSetting": false },
+                  { "name": "ASPNETCORE_ENVIRONMENT",             "value": "Production",                         "slotSetting": false },
                   { "name": "ConnectionStrings__DefaultConnection","value": "$(DB_CONNECTION_STRING)",            "slotSetting": false },
                   { "name": "ConnectionStrings__Redis",            "value": "$(REDIS_CONNECTION_STRING)",         "slotSetting": false },
                   { "name": "JwtSettings__Secret",                 "value": "$(JWT_SECRET)",                      "slotSetting": false },
                   { "name": "EmailSettings__Password",             "value": "$(EMAIL_PASSWORD)",                  "slotSetting": false }
                 ]
 
-          # Health check after deploy
+          # Health check with rollback on failure
           - script: |
               echo "⏳ Waiting for app to start..."
-              sleep 30
-              STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://$(AZURE_APP_SERVICE_NAME_DEV).azurewebsites.net/health)
-              if [ "$STATUS" = "200" ]; then
-                echo "✅ Health check passed — HTTP $STATUS"
-              else
-                echo "❌ Health check failed — HTTP $STATUS"
-                exit 1
-              fi
-            displayName: '🩺 Health Check'
+              sleep 45
+
+              RETRIES=3
+              for i in $(seq 1 $RETRIES); do
+                STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://$(AZURE_APP_SERVICE_NAME_PROD).azurewebsites.net/health)
+                echo "Attempt $i — HTTP $STATUS"
+                if [ "$STATUS" = "200" ]; then
+                  echo "✅ Production health check passed!"
+                  exit 0
+                fi
+                sleep 15
+              done
+
+              echo "❌ Production health check failed after $RETRIES attempts. Manual rollback required."
+              exit 1
+            displayName: '🩺 Health Check (3 retries)'

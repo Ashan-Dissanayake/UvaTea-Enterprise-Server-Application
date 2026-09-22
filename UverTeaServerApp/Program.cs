@@ -209,6 +209,24 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddSignalR();
 
 // ============================================================
+// CORS
+// ============================================================
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowClientApp", policy =>
+    {
+        policy.WithOrigins(
+                "http://localhost:5173",
+                "http://localhost:5174",
+                "http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
+// ============================================================
 // BUILD APPLICATION
 // ============================================================
 
@@ -233,6 +251,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Enable CORS for client application
+app.UseCors("AllowClientApp");
 
 // Rate Limiter
 app.UseRateLimiter();

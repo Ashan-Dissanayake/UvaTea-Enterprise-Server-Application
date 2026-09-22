@@ -16,10 +16,11 @@
 # Environment and Local Secrets (CRITICAL SECURITY)
 .env
 *.env
-appsettings.Production.json
-appsettings.Development.json
-appsettings.*.json
-!appsettings.json
+appsettings.Development.json       # Local dev secrets — NEVER commit
+
+# appsettings.Testing.json and appsettings.Production.json ARE committed
+# (they contain no real secrets — values injected by Azure Pipeline at runtime)
+# .env.example IS committed — it is a safe template with no real values
 
 # OS specific temporary files
 Thumbs.db
