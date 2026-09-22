@@ -1,7 +1,7 @@
 # ============================================================
 #  UvaTea Enterprise Server — MASTER Branch CI/CD Pipeline
 #  Trigger  : push/merge to 'master' branch
-#  Flow      : Build → Unit Tests → Docker Push → Approval → Deploy (Production)
+#  Flow      : Build → Unit Tests → Docker Push (production tags)
 # ============================================================
 
 trigger:
@@ -15,15 +15,13 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  - group: uvatea-production-vars        # Azure DevOps Library → Variable Group
+  - group: uvatea-production-vars
   - name: buildConfiguration
     value: 'Release'
   - name: dockerRepository
     value: '$(DOCKER_HUB_USERNAME)/uvatea-api'
   - name: dockerRegistryServiceConnection
-    value: 'docker-hub-connection'        # Azure DevOps Service Connection name
-  - name: imageTag
-    value: '$(Build.BuildId)'
+    value: 'docker-hub-connection'
 
 # ─────────────────────────────────────────────
 # STAGE 1 — Build & Unit Tests
@@ -68,7 +66,7 @@ stages:
         failTaskOnFailedTests: true
 
 # ─────────────────────────────────────────────
-# STAGE 2 — Docker Build & Push (Production tag)
+# STAGE 2 — Docker Build & Push (Production Tags)
 # ─────────────────────────────────────────────
 - stage: DockerBuildPush
   displayName: '🐋 Docker Build & Push (Production)'
@@ -88,62 +86,3 @@ stages:
         tags: |
           $(Build.BuildId)
           latest
-
-# ─────────────────────────────────────────────
-# STAGE 3 — Manual Approval Gate
-#   Azure DevOps Environment "uvatea-production"
-#   හි Approvals & Checks configure කරන්න
-# ─────────────────────────────────────────────
-- stage: DeployProduction
-  displayName: '🟢 Deploy → Production Environment'
-  dependsOn: DockerBuildPush
-  condition: succeeded()
-  jobs:
-  - deployment: DeployToProdJob
-    displayName: 'Deploy Docker Image to Azure App Service (Production)'
-    environment: 'uvatea-production'     # ← Approval gate මෙහි configure කෙරේ
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: AzureWebAppContainer@1
-            displayName: '🚀 Deploy to Azure App Service (uvatea-api-prod)'
-            inputs:
-              azureSubscription: 'azure-service-connection'
-              appName: '$(AZURE_APP_SERVICE_NAME_PROD)'
-              containers: '$(dockerRepository):$(Build.BuildId)'
-
-          # Inject production environment variables
-          - task: AzureAppServiceSettings@1
-            displayName: '⚙️ Configure App Settings (Production Env Vars)'
-            inputs:
-              azureSubscription: 'azure-service-connection'
-              appName: '$(AZURE_APP_SERVICE_NAME_PROD)'
-              appSettings: |
-                [
-                  { "name": "ASPNETCORE_ENVIRONMENT",             "value": "Production",                         "slotSetting": false },
-                  { "name": "ConnectionStrings__DefaultConnection","value": "$(DB_CONNECTION_STRING)",            "slotSetting": false },
-                  { "name": "ConnectionStrings__Redis",            "value": "$(REDIS_CONNECTION_STRING)",         "slotSetting": false },
-                  { "name": "JwtSettings__Secret",                 "value": "$(JWT_SECRET)",                      "slotSetting": false },
-                  { "name": "EmailSettings__Password",             "value": "$(EMAIL_PASSWORD)",                  "slotSetting": false }
-                ]
-
-          # Health check with rollback on failure
-          - script: |
-              echo "⏳ Waiting for app to start..."
-              sleep 45
-
-              RETRIES=3
-              for i in $(seq 1 $RETRIES); do
-                STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://$(AZURE_APP_SERVICE_NAME_PROD).azurewebsites.net/health)
-                echo "Attempt $i — HTTP $STATUS"
-                if [ "$STATUS" = "200" ]; then
-                  echo "✅ Production health check passed!"
-                  exit 0
-                fi
-                sleep 15
-              done
-
-              echo "❌ Production health check failed after $RETRIES attempts. Manual rollback required."
-              exit 1
-            displayName: '🩺 Health Check (3 retries)'
