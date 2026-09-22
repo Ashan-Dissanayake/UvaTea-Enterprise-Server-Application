@@ -7,7 +7,7 @@
 trigger:
   branches:
     include:
-      - dev
+      - develop
 
 pr: none   # PR builds handled separately
 
