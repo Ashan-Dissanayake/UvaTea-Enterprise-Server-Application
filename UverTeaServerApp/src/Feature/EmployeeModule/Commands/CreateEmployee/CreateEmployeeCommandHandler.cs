@@ -1,6 +1,7 @@
 
 using Mapster;
 using MediatR;
+using UverTeaServerApp.Shared.Caching;
 using UverTeaServerApp.Shared.Data;
 using UverTeaServerApp.src.Feature.EmployeeModule.Events;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Dtos;
@@ -13,15 +14,18 @@ public class CreateEmployeeCommandHandler : IRequestHandler<CreateEmployeeComman
     private readonly UvaTeaDbContext _context;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPublisher _publisher;
+    private readonly ICacheService _cacheService;
 
     public CreateEmployeeCommandHandler(
         UvaTeaDbContext context, 
         IUnitOfWork unitOfWork,
-        IPublisher publisher)
+        IPublisher publisher,
+        ICacheService cacheService)
     {
         _context = context;
         _unitOfWork = unitOfWork;
         _publisher = publisher;
+        _cacheService = cacheService;
     }
 
     public async Task<EmployeeDetailResponseDto> Handle(
@@ -31,6 +35,9 @@ public class CreateEmployeeCommandHandler : IRequestHandler<CreateEmployeeComman
 
         _context.Employees.Add(employee);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        // Invalidate employee cache
+        await _cacheService.RemoveByPrefixAsync("employees:", cancellationToken);
 
         // Publish domain event to trigger real-time notifications and welcome email
         await _publisher.Publish(new EmployeeCreatedEvent(

@@ -4,6 +4,7 @@ using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
 using UverTeaServerApp.Shared.Middlewares;
 using UverTeaServerApp.UnitTests.Common;
 using Moq;
+using UverTeaServerApp.Shared.Caching;
 
 namespace UverTeaServerApp.UnitTests.Features.EmployeeModule.Commands;
 
@@ -31,8 +32,12 @@ public class UpdateEmployeeCommandHandlerTests
         await context.SaveChangesAsync();
 
         var mockUnitOfWork = new Mock<Shared.Data.IUnitOfWork>();
+        var mockCacheService = new Mock<ICacheService>();
 
-        var handler = new UpdateEmployeeCommandHandler(context,mockUnitOfWork.Object);
+        var handler = new UpdateEmployeeCommandHandler(
+            context,
+            mockUnitOfWork.Object,
+            mockCacheService.Object);
         var command = new UpdateEmployeeCommand(
             Id: employee.Id,
             Number: "E003",
@@ -69,8 +74,12 @@ public class UpdateEmployeeCommandHandlerTests
         // Arrange
         using var context = TestDbContextFactory.Create();
         var mockUnitOfWork = new Mock<Shared.Data.IUnitOfWork>();
+        var mockCacheService = new Mock<ICacheService>();
 
-        var handler = new UpdateEmployeeCommandHandler(context,mockUnitOfWork.Object);
+        var handler = new UpdateEmployeeCommandHandler(
+            context,
+            mockUnitOfWork.Object,
+            mockCacheService.Object);
         var command = new UpdateEmployeeCommand(
             Id: 999,
             Number: "E999",

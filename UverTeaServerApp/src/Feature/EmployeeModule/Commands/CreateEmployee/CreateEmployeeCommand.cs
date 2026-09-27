@@ -9,7 +9,7 @@ public record CreateEmployeeCommand(
 
     [Required(ErrorMessage = "Employee number is required.")]
     [RegularExpression(
-        "^\\[E]d{3}$",
+        @"^E\d{3}$",
         ErrorMessage = "Invalid Number"
     )]
     string Number,

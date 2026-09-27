@@ -1,6 +1,7 @@
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UverTeaServerApp.Shared.Caching;
 using UverTeaServerApp.Shared.Data;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Dtos;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
@@ -12,11 +13,16 @@ public class UpdateEmployeeCommandHandler : IRequestHandler<UpdateEmployeeComman
 {
     private readonly UvaTeaDbContext _context;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICacheService _cacheService;
 
-    public UpdateEmployeeCommandHandler(UvaTeaDbContext context, IUnitOfWork unitOfWork)
+    public UpdateEmployeeCommandHandler(
+        UvaTeaDbContext context, 
+        IUnitOfWork unitOfWork,
+        ICacheService cacheService)
     {
         _context = context;
         _unitOfWork = unitOfWork;
+        _cacheService = cacheService;
     }
 
     public async Task<EmployeeDetailResponseDto> Handle(UpdateEmployeeCommand request, CancellationToken cancellationToken)
@@ -32,6 +38,9 @@ public class UpdateEmployeeCommandHandler : IRequestHandler<UpdateEmployeeComman
         request.Adapt(employee);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        // Invalidate employee cache
+        await _cacheService.RemoveByPrefixAsync("employees:", cancellationToken);
 
         return employee.Adapt<EmployeeDetailResponseDto>();
     }

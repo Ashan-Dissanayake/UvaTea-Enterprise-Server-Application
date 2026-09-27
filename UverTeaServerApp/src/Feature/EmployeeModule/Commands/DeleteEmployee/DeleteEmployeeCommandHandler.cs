@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UverTeaServerApp.Shared.Caching;
 using UverTeaServerApp.Shared.Data;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
 using UverTeaServerApp.Shared.Middlewares;
@@ -10,11 +11,16 @@ public class DeleteEmployeeCommandHandler : IRequestHandler<DeleteEmployeeComman
 {
     private readonly UvaTeaDbContext _context;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICacheService _cacheService;
 
-    public DeleteEmployeeCommandHandler(UvaTeaDbContext context, IUnitOfWork unitOfWork)
+    public DeleteEmployeeCommandHandler(
+        UvaTeaDbContext context, 
+        IUnitOfWork unitOfWork,
+        ICacheService cacheService)
     {
         _context = context;
         _unitOfWork = unitOfWork;
+        _cacheService = cacheService;
     }
 
     public async Task<Unit> Handle(DeleteEmployeeCommand request, CancellationToken cancellationToken)
@@ -29,6 +35,9 @@ public class DeleteEmployeeCommandHandler : IRequestHandler<DeleteEmployeeComman
         
         _context.Employees.Remove(employee);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        // Invalidate employee cache
+        await _cacheService.RemoveByPrefixAsync("employees:", cancellationToken);
 
         return Unit.Value;
     }

@@ -40,16 +40,16 @@ public class GetAllEmployeesQueryHandler : IRequestHandler<GetAllEmployeesQuery,
                 (e.Email != null && e.Email.Contains(search)));
         }
 
-        var projectedQuery = query.ProjectToType<EmployeeDetailResponseDto>();
-
         if (!string.IsNullOrWhiteSpace(paginationParams.SortColumn))
         {
-            projectedQuery = projectedQuery.ApplySort(paginationParams.SortColumn, paginationParams.SortDirection);
+            query = query.ApplySort(paginationParams.SortColumn, paginationParams.SortDirection);
         }
         else
         {
-            projectedQuery = projectedQuery.OrderByDescending(e => e.Id);
+            query = query.OrderByDescending(e => e.Id);
         }
+
+        var projectedQuery = query.ProjectToType<EmployeeDetailResponseDto>();
 
         return await projectedQuery.ToPagedResultAsync(paginationParams, cancellationToken);
     }

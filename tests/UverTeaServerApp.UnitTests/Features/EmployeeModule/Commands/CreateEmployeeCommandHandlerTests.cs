@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using UverTeaServerApp.EmployeeModule.Commands.CreateEmployee;
+using UverTeaServerApp.Shared.Caching;
 using UverTeaServerApp.Shared.Data;
 using UverTeaServerApp.UnitTests.Common;
 
@@ -19,8 +20,14 @@ public class CreateEmployeeCommandHandlerTests
 
         var unitOfWork = TestDbContextFactory.CreateUnitOfWork(context);
         var mockPublisher = new Mock<IPublisher>();
+        var mockCacheService = new Mock<ICacheService>();
 
-        var handler = new CreateEmployeeCommandHandler(context, unitOfWork, mockPublisher.Object);
+        var handler = new CreateEmployeeCommandHandler(
+            context,
+            unitOfWork,
+            mockPublisher.Object,
+            mockCacheService.Object);
+
         var command = new CreateEmployeeCommand(
             Number: "E001",
             Fullname: "John Doe",
@@ -46,7 +53,9 @@ public class CreateEmployeeCommandHandlerTests
         result.Fullname.Should().Be("John Doe");
         result.Number.Should().Be("E001");
 
-        var employeeInDb = await context.Employees.FirstOrDefaultAsync(e => e.Number == "E001");
+        var employeeInDb = await context.Employees
+            .FirstOrDefaultAsync(e => e.Number == "E001");
+
         employeeInDb.Should().NotBeNull();
         employeeInDb!.Fullname.Should().Be("John Doe");
         employeeInDb.IsDeleted.Should().BeFalse();
