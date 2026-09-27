@@ -7,6 +7,7 @@ using UverTeaServerApp.Shared.Middlewares;
 using UverTeaServerApp.UnitTests.Common;
 using Moq;
 using UverTeaServerApp.Shared.Data;
+using UverTeaServerApp.Shared.Caching;
 
 namespace UverTeaServerApp.UnitTests.Features.EmployeeModule.Commands;
 
@@ -32,8 +33,13 @@ public class DeleteEmployeeCommandHandlerTests
         await context.SaveChangesAsync();
 
         var unitOfWork = TestDbContextFactory.CreateUnitOfWork(context);
+        var mockCacheService = new Mock<ICacheService>();
 
-        var handler = new DeleteEmployeeCommandHandler(context, unitOfWork);
+        var handler = new DeleteEmployeeCommandHandler(
+            context,
+            unitOfWork,
+            mockCacheService.Object);
+
         var command = new DeleteEmployeeCommand(employee.Id);
 
         // Act
@@ -41,7 +47,7 @@ public class DeleteEmployeeCommandHandlerTests
 
         // Assert
         result.Should().Be(Unit.Value);
-        
+
         var deletedEmployee = await context.Employees.FindAsync(employee.Id);
         deletedEmployee.Should().BeNull();
     }
@@ -53,7 +59,12 @@ public class DeleteEmployeeCommandHandlerTests
         using var context = TestDbContextFactory.Create();
 
         var mockUnitOfWork = new Mock<IUnitOfWork>();
-        var handler = new DeleteEmployeeCommandHandler(context,mockUnitOfWork.Object);
+        var mockCacheService = new Mock<ICacheService>();
+
+        var handler = new DeleteEmployeeCommandHandler(
+            context,
+            mockUnitOfWork.Object,
+            mockCacheService.Object);
         var command = new DeleteEmployeeCommand(999);
 
         // Act
