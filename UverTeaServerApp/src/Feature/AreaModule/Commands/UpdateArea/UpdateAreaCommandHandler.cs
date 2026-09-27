@@ -1,6 +1,7 @@
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UverTeaServerApp.Shared.Caching;
 using UverTeaServerApp.Shared.Data;
 using UverTeaServerApp.Shared.Middlewares;
 using UverTeaServerApp.src.Feature.AreaModule.Models.Dtos;
@@ -12,13 +13,16 @@ public class UpdateAreaCommandHandler
 {
     private readonly UvaTeaDbContext _context;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICacheService _cacheService;
 
     public UpdateAreaCommandHandler(
         UvaTeaDbContext context,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        ICacheService cacheService)
     {
         _context = context;
         _unitOfWork = unitOfWork;
+        _cacheService = cacheService;
     }
 
     public async Task<AreaDetailResponseDto> Handle(
@@ -57,6 +61,9 @@ public class UpdateAreaCommandHandler
         area.PlantingConfigurationId = request.PlantingConfigurationId;
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        // Invalidate area cache
+        await _cacheService.RemoveByPrefixAsync("areas:", cancellationToken);
 
         var updatedArea = await _context.Areas
             .AsNoTracking()

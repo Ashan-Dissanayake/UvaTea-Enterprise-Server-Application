@@ -32,20 +32,19 @@ public class GetAllAreasQueryHandler
             .Include(e => e.Supervisor)
             .AsQueryable();
 
-        var projectedQuery =
-            query.ProjectToType<AreaDetailResponseDto>();
-
         if (!string.IsNullOrWhiteSpace(paginationParams.SortColumn))
         {
-            projectedQuery = projectedQuery.ApplySort(
+            query = query.ApplySort(
                 paginationParams.SortColumn,
                 paginationParams.SortDirection);
         }
         else
         {
-            projectedQuery =
-                projectedQuery.OrderByDescending(e => e.Id);
+            query = query.OrderByDescending(e => e.Id);
         }
+
+        var projectedQuery =
+            query.ProjectToType<AreaDetailResponseDto>();
 
         return await projectedQuery.ToPagedResultAsync(
             paginationParams,

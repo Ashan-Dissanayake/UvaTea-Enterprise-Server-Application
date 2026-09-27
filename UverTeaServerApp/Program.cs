@@ -66,9 +66,7 @@ builder.Services.AddScoped<ICacheService, CacheService>();
 // ============================================================
 
 builder.Services.AddScoped<EmployeeLookupService>();
-
 builder.Services.AddScoped<IEmailService, EmailService>();
-
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // ============================================================
@@ -76,7 +74,6 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 // ============================================================
 
 builder.Services.AddHttpContextAccessor();
-
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
 // ============================================================
@@ -101,11 +98,8 @@ builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme =
-        JwtBearerDefaults.AuthenticationScheme;
-
-    options.DefaultChallengeScheme =
-        JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
 {
@@ -124,6 +118,22 @@ builder.Services.AddAuthentication(options =>
                 Encoding.UTF8.GetBytes(jwtSettings.Secret)),
 
         ClockSkew = TimeSpan.Zero
+    };
+
+    // 1. JWT Authentication with SignalR Query String Token Extraction
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
     };
 });
 
@@ -147,8 +157,7 @@ builder.Services.AddMediatR(cfg =>
 // FLUENT VALIDATION
 // ============================================================
 
-builder.Services.AddValidatorsFromAssembly(
-    typeof(Program).Assembly);
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
 // ============================================================
 // MVC / CONTROLLERS
@@ -186,15 +195,12 @@ builder.Services.AddRateLimiter(options =>
                             Window = TimeSpan.FromMinutes(1)
                         }));
 
-    options.OnRejected = async (
-        context,
-        cancellationToken) =>
+    options.OnRejected = async (context, cancellationToken) =>
     {
         context.HttpContext.Response.StatusCode =
             StatusCodes.Status429TooManyRequests;
 
-        context.HttpContext.Response.ContentType =
-            "application/json";
+        context.HttpContext.Response.ContentType = "application/json";
 
         await context.HttpContext.Response.WriteAsync(
             "{\"error\": \"Too many requests. Please try again later.\"}",
@@ -219,7 +225,10 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(
                 "http://localhost:5173",
                 "http://localhost:5174",
-                "http://localhost:3000")
+                "http://localhost:3000",
+                "http://127.0.0.1:5173",
+                "http://127.0.0.1:5174",
+                "http://127.0.0.1:3000")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -245,12 +254,14 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference(options =>
     {
         options.Title = "UvaTea Enterprise API Reference";
-        options.Theme =
-            Scalar.AspNetCore.ScalarTheme.DeepSpace;
+        options.Theme = Scalar.AspNetCore.ScalarTheme.DeepSpace;
     });
 }
 
 app.UseHttpsRedirection();
+
+// FIXED: Explicitly call UseRouting before UseCors for correct route matching
+app.UseRouting();
 
 // Enable CORS for client application
 app.UseCors("AllowClientApp");
@@ -260,7 +271,6 @@ app.UseRateLimiter();
 
 // Authentication MUST come before Authorization
 app.UseAuthentication();
-
 app.UseAuthorization();
 
 // ============================================================
@@ -272,7 +282,8 @@ app.MapHealthChecks("/health")
 
 app.MapControllers();
 
-app.MapHub<NotificationHub>(
-    "/hubs/notification");
+//  SignalR Hub Endpoint Mapping
+app.MapHub<NotificationHub>("/hubs/notification")
+   .DisableRateLimiting();
 
 app.Run();

@@ -1,6 +1,7 @@
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UverTeaServerApp.Shared.Caching;
 using UverTeaServerApp.Shared.Data;
 using UverTeaServerApp.Shared.Security;
 using UverTeaServerApp.src.Feature.AreaModule.Models.Dtos;
@@ -14,15 +15,18 @@ public class CreateAreaCommandHandler
     private readonly UvaTeaDbContext _context;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUser _currentUser;
+    private readonly ICacheService _cacheService;
 
     public CreateAreaCommandHandler(
         UvaTeaDbContext context,
         IUnitOfWork unitOfWork,
-        ICurrentUser currentUser)
+        ICurrentUser currentUser,
+        ICacheService cacheService)
     {
         _context = context;
         _unitOfWork = unitOfWork;
         _currentUser = currentUser;
+        _cacheService = cacheService;
     }
 
     public async Task<AreaDetailResponseDto> Handle(
@@ -56,6 +60,9 @@ public class CreateAreaCommandHandler
         _context.Areas.Add(area);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        // Invalidate area cache
+        await _cacheService.RemoveByPrefixAsync("areas:", cancellationToken);
 
         // Reload navigation properties for response
         var createdArea = await _context.Areas

@@ -41,8 +41,7 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
 
         builder.Property(e => e.Nic)
                .HasColumnName("nic")
-               .HasMaxLength(12)
-               .IsFixedLength();
+               .HasMaxLength(12);
 
         builder.Property(e => e.Address)
                .HasColumnName("address")
@@ -59,8 +58,7 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
 
         builder.Property(e => e.Land)
                .HasColumnName("land")
-               .HasMaxLength(10)
-               .IsFixedLength();
+               .HasMaxLength(10);
 
         builder.Property(e => e.Doassignment)
                .HasColumnName("doassignment")
