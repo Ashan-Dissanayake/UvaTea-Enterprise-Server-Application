@@ -1,7 +1,7 @@
 # ============================================================
-#  UvaTea Enterprise Server — DEV Branch CI/CD Pipeline
-#  Trigger  : push to 'develop' branch
-#  Flow      : Build → Unit Tests → Docker Push (Docker Hub)
+# UvaTea Enterprise Server — DEVELOP Branch CI Pipeline
+# Trigger : push to 'develop' branch
+# Flow    : Build → Unit Tests → Docker Build → Docker Hub Push
 # ============================================================
 
 trigger:
@@ -15,24 +15,33 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  - group: uvatea-testing-vars
   - name: buildConfiguration
     value: 'Release'
+
+  - name: dockerHubUsername
+    value: 'ashanpd'
+
   - name: dockerRepository
     value: '$(DOCKER_HUB_USERNAME)/uvatea-api'
+
   - name: dockerRegistryServiceConnection
     value: 'docker-hub-connection'
+
 
 # ─────────────────────────────────────────────
 # STAGE 1 — Build & Unit Tests
 # ─────────────────────────────────────────────
 stages:
+
 - stage: BuildAndTest
-  displayName: '🧪 Build & Unit Tests'
+  displayName: 'Build & Unit Tests'
+
   jobs:
   - job: BuildTestJob
     displayName: 'Restore → Build → Test'
+
     steps:
+
     - task: UseDotNet@2
       displayName: 'Install .NET 10 SDK'
       inputs:
@@ -40,11 +49,11 @@ stages:
         version: '10.x'
 
     - script: dotnet restore
-      displayName: '📦 Restore NuGet Packages'
+      displayName: 'Restore NuGet Packages'
       workingDirectory: '$(Build.SourcesDirectory)'
 
     - script: dotnet build --configuration $(buildConfiguration) --no-restore
-      displayName: '🏗️ Build Solution'
+      displayName: 'Build Solution'
       workingDirectory: '$(Build.SourcesDirectory)'
 
     - script: |
@@ -54,30 +63,35 @@ stages:
           --verbosity normal \
           --logger "trx;LogFileName=test-results.trx" \
           --results-directory $(Agent.TempDirectory)/TestResults
-      displayName: '✅ Run Unit Tests'
+      displayName: 'Run Unit Tests'
       workingDirectory: '$(Build.SourcesDirectory)'
 
     - task: PublishTestResults@2
-      displayName: '📊 Publish Test Results'
+      displayName: 'Publish Test Results'
       condition: always()
       inputs:
         testResultsFormat: 'VSTest'
         testResultsFiles: '$(Agent.TempDirectory)/TestResults/*.trx'
         failTaskOnFailedTests: true
 
+
 # ─────────────────────────────────────────────
-# STAGE 2 — Docker Build & Push to Docker Hub
+# STAGE 2 — Docker Build & Push
 # ─────────────────────────────────────────────
 - stage: DockerBuildPush
-  displayName: '🐋 Docker Build & Push'
+  displayName: 'Docker Build & Push'
+
   dependsOn: BuildAndTest
   condition: succeeded()
+
   jobs:
   - job: DockerJob
     displayName: 'Build Image → Push → Docker Hub'
+
     steps:
+
     - task: Docker@2
-      displayName: '🐋 Build & Push → dev-$(Build.BuildId) + dev-latest'
+      displayName: 'Build & Push → dev-$(Build.BuildId) + dev-latest'
       inputs:
         command: 'buildAndPush'
         repository: '$(dockerRepository)'

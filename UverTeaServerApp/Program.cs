@@ -84,8 +84,8 @@ var jwtSettings =
     builder.Configuration
         .GetSection(JwtSettings.SectionName)
         .Get<JwtSettings>()
-    ?? throw new InvalidOperationException(
-        "JwtSettings is not configured in appsettings.json.");
+    ??throw new InvalidOperationException(
+    "JwtSettings is not configured.");
 
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection(JwtSettings.SectionName));
