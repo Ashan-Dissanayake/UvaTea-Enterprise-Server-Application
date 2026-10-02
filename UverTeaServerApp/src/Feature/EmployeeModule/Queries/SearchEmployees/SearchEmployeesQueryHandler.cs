@@ -26,7 +26,9 @@ public class SearchEmployeesQueryHandler : IRequestHandler<SearchEmployeesQuery,
             .Include(e => e.Employeestatus)
             .AsQueryable();
 
-        var paramsDict = request.ParamsDict;
+        var paramsDict = request.ParamsDict != null
+            ? new Dictionary<string, string?>(request.ParamsDict, StringComparer.OrdinalIgnoreCase)
+            : null;
 
         if (paramsDict != null)
         {
@@ -57,16 +59,16 @@ public class SearchEmployeesQueryHandler : IRequestHandler<SearchEmployeesQuery,
                 (e.Email != null && e.Email.Contains(search)));
         }
 
-        var projectedQuery = query.ProjectToType<EmployeeDetailResponseDto>();
-
         if (!string.IsNullOrWhiteSpace(paginationParams.SortColumn))
         {
-            projectedQuery = projectedQuery.ApplySort(paginationParams.SortColumn, paginationParams.SortDirection);
+            query = query.ApplySort(paginationParams.SortColumn, paginationParams.SortDirection);
         }
         else
         {
-            projectedQuery = projectedQuery.OrderByDescending(e => e.Id);
+            query = query.OrderByDescending(e => e.Id);
         }
+
+        var projectedQuery = query.ProjectToType<EmployeeDetailResponseDto>();
 
         return await projectedQuery.ToPagedResultAsync(paginationParams, cancellationToken);
     }

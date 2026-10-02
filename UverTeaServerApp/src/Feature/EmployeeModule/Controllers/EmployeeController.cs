@@ -81,7 +81,7 @@ public class EmployeeController : ControllerBase
         StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<PagedResult<EmployeeDetailResponseDto>>>
         SearchEmployees(
-            [FromQuery] Dictionary<string, string?> paramsDict,
+            [FromQuery(Name = "")] Dictionary<string, string?> paramsDict,
             [FromQuery] PaginationParams paginationParams)
     {
         var result =
