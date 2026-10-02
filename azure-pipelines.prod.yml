@@ -22,7 +22,7 @@ variables:
     value: 'ashanpd'
 
   - name: dockerRepository
-    value: '$(DOCKER_HUB_USERNAME)/uvatea-api'
+    value: '$(dockerHubUsername)/uvatea-api'
 
   - name: dockerRegistryServiceConnection
     value: 'docker-hub-connection'
