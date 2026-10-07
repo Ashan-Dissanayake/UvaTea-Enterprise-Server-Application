@@ -2,14 +2,8 @@ using System;
 using System.Collections.Generic;
 using UverTeaServerApp.Shared.Entities;
 using UverTeaServerApp.src.Feature.AreaModule.Models.Entities;
-using UverTeaServerApp.src.Feature.DistributerModule.Models.Entities;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
-using UverTeaServerApp.src.Feature.FertilizerDistributionModule.Models.Entities;
-using UverTeaServerApp.src.Feature.FertilizerModule.Models.Entities;
-using UverTeaServerApp.src.Feature.InvoiceModule.Models.Entities;
-using UverTeaServerApp.src.Feature.OrderModule.Models.Entities;
-using UverTeaServerApp.src.Feature.PluckingModule.Models.Entities;
-using UverTeaServerApp.src.Feature.ProductionOrderModule.Models.Entities;
+
 
 namespace UverTeaServerApp.src.Feature.UserModule.Models.Entities;
 
@@ -40,21 +34,7 @@ public partial class User : IAuditableEntity, ISoftDeletable
 
     public virtual ICollection<Area> Areas { get; set; } = new List<Area>();
 
-    public virtual ICollection<Distributor> Distributors { get; set; } = new List<Distributor>();
-
     public virtual Employee Employee { get; set; } = null!;
-
-    public virtual ICollection<Fertilizerdistribution> Fertilizerdistributions { get; set; } = new List<Fertilizerdistribution>();
-
-    public virtual ICollection<Fertilizer> Fertilizers { get; set; } = new List<Fertilizer>();
-
-    public virtual ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
-
-    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
-
-    public virtual ICollection<Plucking> Pluckings { get; set; } = new List<Plucking>();
-
-    public virtual ICollection<Productionorder> Productionorders { get; set; } = new List<Productionorder>();
 
     public virtual Role Role { get; set; } = null!;
 

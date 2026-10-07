@@ -19,8 +19,6 @@
 
 # ASP.NET Core local secrets
 appsettings.Development.json
-appsettings.Testing.json
-appsettings.Production.json
 
 # OS specific temporary files
 Thumbs.db
@@ -28,3 +26,5 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 .DS_Store
+
+$env:ASPNETCORE_ENVIRONMENT="Development"

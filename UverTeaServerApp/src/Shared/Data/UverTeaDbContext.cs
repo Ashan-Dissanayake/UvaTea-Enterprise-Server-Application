@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using UverTeaServerApp.Shared.Entities;
 using UverTeaServerApp.src.Feature.AreaModule.Models.Entities;
 using UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
-using UverTeaServerApp.src.Feature.FertilizerModule.Models.Entities;
+using UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities;
 using UverTeaServerApp.src.Feature.UserModule.Models.Entities;
 
 namespace UverTeaServerApp.Shared.Data;
@@ -46,18 +46,15 @@ public class UvaTeaDbContext : DbContext
     public DbSet<Areastatushistory> Areastatushistories { get; set; }
 
     // =========================================================
-    // Fertilizer
+    // Green Leaf
     // =========================================================
 
-    public DbSet<Fertilizer> Fertilizers { get; set; }
+    public DbSet<Greenleafbatch> Greenleafbatches { get; set; }
+    public DbSet<Containertype> Containertypes { get; set; }
+    public DbSet<Weathercondition> Weatherconditions { get; set; }
+    public DbSet<Leafcondition> Leafconditions { get; set; }
+    public DbSet<Leafbatchstatus> Leafbatchstatuses { get; set; }
 
-    public DbSet<Fertilizerstatus> FertilizerStatuses { get; set; }
-
-    public DbSet<Fertilizertype> FertilizerTypes { get; set; }
-
-    public DbSet<Fertilzerbrand> FertilizerBrands { get; set; }
-
-    public DbSet<UnitOfMeasure> UnitOfMeasures { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

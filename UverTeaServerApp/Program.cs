@@ -13,6 +13,8 @@ using UverTeaServerApp.Shared.Middlewares;
 using UverTeaServerApp.Shared.Security;
 using UverTeaServerApp.Shared.Services;
 using UverTeaServerApp.src.Feature.EmployeeModule.Services;
+using UverTeaServerApp.src.Feature.GreenLeafModule.Domain.Risk;
+using UverTeaServerApp.src.Feature.GreenLeafModule.Domain.Risk.Rules;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,6 +70,12 @@ builder.Services.AddScoped<ICacheService, CacheService>();
 builder.Services.AddScoped<EmployeeLookupService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+builder.Services.AddScoped<IRiskAssessmentEngine, RiskAssessmentEngine>();
+
+builder.Services.AddScoped<IRiskRule, FreshnessRule>();
+builder.Services.AddScoped<IRiskRule, TransportDelayRule>();
+builder.Services.AddScoped<IRiskRule, LeafConditionRule>();
 
 // ============================================================
 // HTTP CONTEXT / CURRENT USER

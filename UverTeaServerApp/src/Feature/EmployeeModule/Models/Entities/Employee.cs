@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UverTeaServerApp.Shared.Entities;
 using UverTeaServerApp.src.Feature.AreaModule.Models.Entities;
-using UverTeaServerApp.src.Feature.PluckingModule.Models.Entities;
 using UverTeaServerApp.src.Feature.UserModule.Models.Entities;
 
 namespace UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities;
@@ -49,7 +48,6 @@ public partial class Employee : IAuditableEntity, ISoftDeletable
 
     public virtual Gender Gender { get; set; } = null!;
 
-    public virtual ICollection<Plucking> Pluckings { get; set; } = new List<Plucking>();
 
     public virtual ICollection<User> Users { get; set; } = new List<User>();
 
