@@ -16,15 +16,20 @@ public class RiskAssessmentEngine : IRiskAssessmentEngine
         Greenleafbatch batch,
         CancellationToken cancellationToken)
     {
-        var riskScore = _rules.Sum(
-            rule => rule.Evaluate(batch));
+        var ruleResults = _rules
+            .Select(rule => rule.Evaluate(batch))
+            .ToList();
+
+        var riskScore = ruleResults.Sum(
+            result => result.Score);
 
         var riskLevel = DetermineRiskLevel(riskScore);
 
         return Task.FromResult(
             new RiskAssessmentResult(
                 riskScore,
-                riskLevel));
+                riskLevel,
+                ruleResults));
     }
 
     private static string DetermineRiskLevel(

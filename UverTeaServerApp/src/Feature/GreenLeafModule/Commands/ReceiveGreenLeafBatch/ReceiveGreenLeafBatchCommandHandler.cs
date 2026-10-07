@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using UverTeaServerApp.Shared.Data;
 using UverTeaServerApp.Shared.Middlewares;
+using UverTeaServerApp.src.Feature.GreenLeafModule.Domain.Risk;
 using UverTeaServerApp.src.Feature.GreenLeafModule.Models.Dtos;
 using UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities;
 
@@ -15,13 +16,16 @@ public class ReceiveGreenLeafBatchCommandHandler
 {
     private readonly UvaTeaDbContext _context;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IRiskAssessmentEngine _riskAssessmentEngine;
 
     public ReceiveGreenLeafBatchCommandHandler(
         UvaTeaDbContext context,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IRiskAssessmentEngine riskAssessmentEngine)
     {
         _context = context;
         _unitOfWork = unitOfWork;
+        _riskAssessmentEngine = riskAssessmentEngine;
     }
 
     public async Task<GreenLeafIntakeResponseDto> Handle(
@@ -65,7 +69,30 @@ public class ReceiveGreenLeafBatchCommandHandler
 
         _context.Greenleafbatches.Add(batch);
 
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        var riskAssessment =
+            await _riskAssessmentEngine.AssessAsync(
+                batch,
+                cancellationToken);
+
+        var riskAssessmentEntity = new Greenleafriskassessment
+        {
+            GreenLeafBatch = batch,
+            RiskScore = riskAssessment.RiskScore,
+            RiskLevel = riskAssessment.RiskLevel,
+            RiskReason = string.Join(
+                "; ",
+                riskAssessment.RuleResults
+                    .Where(x =>
+                        !string.IsNullOrWhiteSpace(x.Reason))
+                    .Select(x => x.Reason)),
+            AssessedAt = DateTime.UtcNow
+        };
+
+        _context.Greenleafriskassessment.Add(
+            riskAssessmentEntity);
+
+        await _unitOfWork.SaveChangesAsync(
+            cancellationToken);
 
         var createdBatch = await _context.Greenleafbatches
             .AsNoTracking()
@@ -74,6 +101,7 @@ public class ReceiveGreenLeafBatchCommandHandler
             .Include(x => x.WeatherCondition)
             .Include(x => x.LeafCondition)
             .Include(x => x.LeafBatchStatus)
+            .Include(x => x.GreenLeafBatch)
             .SingleAsync(
                 x => x.Id == batch.Id,
                 cancellationToken);
