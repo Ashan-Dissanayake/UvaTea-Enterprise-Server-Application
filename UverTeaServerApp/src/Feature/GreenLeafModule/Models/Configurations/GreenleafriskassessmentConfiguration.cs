@@ -9,7 +9,7 @@ public class GreenleafriskassessmentConfiguration
 {
     public void Configure(EntityTypeBuilder<Greenleafriskassessment> builder)
     {
-        // Table Name
+        // Table
         builder.ToTable(
             "greenleafriskassessment",
             schema: "uvateafactory");
@@ -18,48 +18,42 @@ public class GreenleafriskassessmentConfiguration
         builder.HasKey(r => r.Id);
 
         builder.Property(r => r.Id)
-               .HasColumnName("id")
-               .ValueGeneratedOnAdd();
+            .HasColumnName("id")
+            .ValueGeneratedOnAdd();
 
         // Foreign Key
         builder.Property(r => r.GreenLeafBatchId)
-               .HasColumnName("greenleafbatch_id")
-               .IsRequired();
+            .HasColumnName("greenleafbatch_id")
+            .IsRequired();
 
-        // Risk Score
+        // Risk Assessment Properties
         builder.Property(r => r.RiskScore)
-               .HasColumnName("riskscore")
-               .IsRequired();
+            .HasColumnName("riskscore")
+            .IsRequired();
 
-        // Risk Level
         builder.Property(r => r.RiskLevel)
-               .HasColumnName("risklevel")
-               .HasMaxLength(45)
-               .IsRequired();
+            .HasColumnName("risklevel")
+            .HasMaxLength(45)
+            .IsRequired();
 
-        // Risk Reason
         builder.Property(r => r.RiskReason)
-               .HasColumnName("riskreason")
-               .HasColumnType("text");
+            .HasColumnName("riskreason")
+            .HasColumnType("text");
 
-        // Assessed At
         builder.Property(r => r.AssessedAt)
-               .HasColumnName("assessed_at")
-               .HasColumnType("datetime")
-               .IsRequired();
+            .HasColumnName("assessed_at")
+            .HasColumnType("datetime")
+            .IsRequired();
 
-        // =========================================================
         // One-to-One Relationship
-        // =========================================================
-
         builder.HasOne(r => r.GreenLeafBatch)
-               .WithOne(g => g.GreenLeafBatch)
-               .HasForeignKey<Greenleafriskassessment>(
-                   r => r.GreenLeafBatchId)
-               .OnDelete(DeleteBehavior.Cascade);
+            .WithOne(g => g.RiskAssessment)
+            .HasForeignKey<Greenleafriskassessment>(
+                r => r.GreenLeafBatchId)
+            .OnDelete(DeleteBehavior.Restrict);
 
-        // Ensure One-to-One
+        // Unique Foreign Key
         builder.HasIndex(r => r.GreenLeafBatchId)
-               .IsUnique();
+            .IsUnique();
     }
 }

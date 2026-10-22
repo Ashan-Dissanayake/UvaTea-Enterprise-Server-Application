@@ -42,5 +42,5 @@ public partial class Greenleafbatch
 
     public virtual Leafbatchstatus LeafBatchStatus { get; set; } = null!;
 
-    public virtual Greenleafriskassessment? GreenLeafBatch { get; set; }
+public virtual Greenleafriskassessment? RiskAssessment { get; set; }
 }

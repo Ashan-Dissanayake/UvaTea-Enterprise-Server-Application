@@ -101,7 +101,7 @@ public class ReceiveGreenLeafBatchCommandHandler
             .Include(x => x.WeatherCondition)
             .Include(x => x.LeafCondition)
             .Include(x => x.LeafBatchStatus)
-            .Include(x => x.GreenLeafBatch)
+            .Include(x => x.RiskAssessment)
             .SingleAsync(
                 x => x.Id == batch.Id,
                 cancellationToken);

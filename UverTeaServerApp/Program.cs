@@ -13,6 +13,7 @@ using UverTeaServerApp.Shared.Middlewares;
 using UverTeaServerApp.Shared.Security;
 using UverTeaServerApp.Shared.Services;
 using UverTeaServerApp.src.Feature.EmployeeModule.Services;
+using UverTeaServerApp.src.Feature.GreenLeafModule.Domain.Priority;
 using UverTeaServerApp.src.Feature.GreenLeafModule.Domain.Risk;
 using UverTeaServerApp.src.Feature.GreenLeafModule.Domain.Risk.Rules;
 
@@ -76,6 +77,8 @@ builder.Services.AddScoped<IRiskAssessmentEngine, RiskAssessmentEngine>();
 builder.Services.AddScoped<IRiskRule, FreshnessRule>();
 builder.Services.AddScoped<IRiskRule, TransportDelayRule>();
 builder.Services.AddScoped<IRiskRule, LeafConditionRule>();
+
+builder.Services.AddScoped<ProcessingPriorityEngine>();
 
 // ============================================================
 // HTTP CONTEXT / CURRENT USER
