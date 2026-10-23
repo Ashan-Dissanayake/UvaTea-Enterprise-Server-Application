@@ -46,7 +46,8 @@ public class GreenleafbatchConfiguration
 
         builder.Property(g => g.LeafBatchStatusId)
             .HasColumnName("leafbatch_status_id")
-            .IsRequired();
+            .IsRequired()
+            .IsConcurrencyToken();
 
         builder.Property(g => g.PluckingDateTime)
             .HasColumnName("pluckingdatetime")
