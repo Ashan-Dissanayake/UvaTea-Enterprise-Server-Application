@@ -503,6 +503,237 @@ namespace UverTeaServerApp.Migrations
                     b.ToTable("gender", "uvateafactory");
                 });
 
+            modelBuilder.Entity("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Containertype", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(45)
+                        .HasColumnType("nvarchar(45)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("containertype", "uvateafactory");
+                });
+
+            modelBuilder.Entity("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Greenleafbatch", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AreaId")
+                        .HasColumnType("int")
+                        .HasColumnName("area_id");
+
+                    b.Property<DateTime>("ArrivalDateTime")
+                        .HasColumnType("datetime")
+                        .HasColumnName("arrivaldatetime");
+
+                    b.Property<string>("BatchNumber")
+                        .IsRequired()
+                        .HasMaxLength(45)
+                        .HasColumnType("nvarchar(45)")
+                        .HasColumnName("batchnumber");
+
+                    b.Property<DateTime>("CollectionDateTime")
+                        .HasColumnType("datetime")
+                        .HasColumnName("collectiondatetime");
+
+                    b.Property<int>("ContainerTypeId")
+                        .HasColumnType("int")
+                        .HasColumnName("containertype_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("LeafBatchStatusId")
+                        .IsConcurrencyToken()
+                        .HasColumnType("int")
+                        .HasColumnName("leafbatch_status_id");
+
+                    b.Property<int>("LeafConditionId")
+                        .HasColumnType("int")
+                        .HasColumnName("leafcondition_id");
+
+                    b.Property<DateTime>("PluckingDateTime")
+                        .HasColumnType("datetime")
+                        .HasColumnName("pluckingdatetime");
+
+                    b.Property<string>("Remarks")
+                        .HasColumnType("text")
+                        .HasColumnName("remarks");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("WeatherConditionId")
+                        .HasColumnType("int")
+                        .HasColumnName("weathercondition_id");
+
+                    b.Property<decimal>("Weight")
+                        .HasColumnType("decimal(10,2)")
+                        .HasColumnName("weight");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AreaId");
+
+                    b.HasIndex("BatchNumber")
+                        .IsUnique();
+
+                    b.HasIndex("ContainerTypeId");
+
+                    b.HasIndex("LeafBatchStatusId");
+
+                    b.HasIndex("LeafConditionId");
+
+                    b.HasIndex("WeatherConditionId");
+
+                    b.ToTable("greenleafbatch", "uvateafactory");
+                });
+
+            modelBuilder.Entity("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Greenleafprocessingrecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("GreenLeafBatchId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("ProcessedWeight")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("ProcessingNotes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GreenLeafBatchId")
+                        .IsUnique();
+
+                    b.ToTable("greenleafprocessingrecord", "uvateafactory");
+                });
+
+            modelBuilder.Entity("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Greenleafriskassessment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AssessedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("assessed_at");
+
+                    b.Property<int>("GreenLeafBatchId")
+                        .HasColumnType("int")
+                        .HasColumnName("greenleafbatch_id");
+
+                    b.Property<string>("RiskLevel")
+                        .IsRequired()
+                        .HasMaxLength(45)
+                        .HasColumnType("nvarchar(45)")
+                        .HasColumnName("risklevel");
+
+                    b.Property<string>("RiskReason")
+                        .HasColumnType("text")
+                        .HasColumnName("riskreason");
+
+                    b.Property<int>("RiskScore")
+                        .HasColumnType("int")
+                        .HasColumnName("riskscore");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GreenLeafBatchId")
+                        .IsUnique();
+
+                    b.ToTable("greenleafriskassessment", "uvateafactory");
+                });
+
+            modelBuilder.Entity("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Leafbatchstatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(45)
+                        .HasColumnType("nvarchar(45)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("leafbatchstatus", "uvateafactory");
+                });
+
+            modelBuilder.Entity("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Leafcondition", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(45)
+                        .HasColumnType("nvarchar(45)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("leafcondition", "uvateafactory");
+                });
+
+            modelBuilder.Entity("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Weathercondition", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(45)
+                        .HasColumnType("nvarchar(45)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("weathercondition", "uvateafactory");
+                });
+
             modelBuilder.Entity("UverTeaServerApp.src.Feature.UserModule.Models.Entities.Module", b =>
                 {
                     b.Property<int>("Id")
@@ -830,6 +1061,71 @@ namespace UverTeaServerApp.Migrations
                     b.Navigation("Gender");
                 });
 
+            modelBuilder.Entity("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Greenleafbatch", b =>
+                {
+                    b.HasOne("UverTeaServerApp.src.Feature.AreaModule.Models.Entities.Area", "Area")
+                        .WithMany()
+                        .HasForeignKey("AreaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Containertype", "ContainerType")
+                        .WithMany("Greenleafbatchs")
+                        .HasForeignKey("ContainerTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Leafbatchstatus", "LeafBatchStatus")
+                        .WithMany("Greenleafbatchs")
+                        .HasForeignKey("LeafBatchStatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Leafcondition", "LeafCondition")
+                        .WithMany("Greenleafbatchs")
+                        .HasForeignKey("LeafConditionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Weathercondition", "WeatherCondition")
+                        .WithMany("Greenleafbatchs")
+                        .HasForeignKey("WeatherConditionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Area");
+
+                    b.Navigation("ContainerType");
+
+                    b.Navigation("LeafBatchStatus");
+
+                    b.Navigation("LeafCondition");
+
+                    b.Navigation("WeatherCondition");
+                });
+
+            modelBuilder.Entity("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Greenleafprocessingrecord", b =>
+                {
+                    b.HasOne("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Greenleafbatch", "GreenLeafBatch")
+                        .WithOne()
+                        .HasForeignKey("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Greenleafprocessingrecord", "GreenLeafBatchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("GreenLeafBatch");
+                });
+
+            modelBuilder.Entity("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Greenleafriskassessment", b =>
+                {
+                    b.HasOne("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Greenleafbatch", "GreenLeafBatch")
+                        .WithOne("RiskAssessment")
+                        .HasForeignKey("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Greenleafriskassessment", "GreenLeafBatchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("GreenLeafBatch");
+                });
+
             modelBuilder.Entity("UverTeaServerApp.src.Feature.UserModule.Models.Entities.Operation", b =>
                 {
                     b.HasOne("UverTeaServerApp.src.Feature.UserModule.Models.Entities.Module", "Module")
@@ -951,6 +1247,31 @@ namespace UverTeaServerApp.Migrations
             modelBuilder.Entity("UverTeaServerApp.src.Feature.EmployeeModule.Models.Entities.Gender", b =>
                 {
                     b.Navigation("Employees");
+                });
+
+            modelBuilder.Entity("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Containertype", b =>
+                {
+                    b.Navigation("Greenleafbatchs");
+                });
+
+            modelBuilder.Entity("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Greenleafbatch", b =>
+                {
+                    b.Navigation("RiskAssessment");
+                });
+
+            modelBuilder.Entity("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Leafbatchstatus", b =>
+                {
+                    b.Navigation("Greenleafbatchs");
+                });
+
+            modelBuilder.Entity("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Leafcondition", b =>
+                {
+                    b.Navigation("Greenleafbatchs");
+                });
+
+            modelBuilder.Entity("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Weathercondition", b =>
+                {
+                    b.Navigation("Greenleafbatchs");
                 });
 
             modelBuilder.Entity("UverTeaServerApp.src.Feature.UserModule.Models.Entities.Module", b =>

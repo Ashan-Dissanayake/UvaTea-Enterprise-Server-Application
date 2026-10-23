@@ -56,6 +56,9 @@ public class UvaTeaDbContext : DbContext
     public DbSet<Leafbatchstatus> Leafbatchstatuses { get; set; }
     public DbSet<Greenleafriskassessment> Greenleafriskassessment { get; set; }
 
+    public DbSet<Greenleafprocessingrecord> Greenleafprocessingrecords
+    => Set<Greenleafprocessingrecord>();
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
