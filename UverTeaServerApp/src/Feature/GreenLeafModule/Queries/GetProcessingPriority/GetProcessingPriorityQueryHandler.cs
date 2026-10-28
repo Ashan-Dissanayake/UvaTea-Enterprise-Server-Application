@@ -10,7 +10,7 @@ public sealed class GetProcessingPriorityQueryHandler
         GetProcessingPriorityQuery,
         IReadOnlyList<ProcessingPriorityResult>>
 {
-    private const string ReceivedStatus = "RECEIVED";
+    private const string QueuedStatus = "QUEUED";
 
     private readonly UvaTeaDbContext _context;
     private readonly ProcessingPriorityEngine _priorityEngine;
@@ -32,8 +32,8 @@ public sealed class GetProcessingPriorityQueryHandler
             .Include(batch => batch.LeafBatchStatus)
             .Include(batch => batch.RiskAssessment)
             .Where(batch =>
-                batch.LeafBatchStatus.Name == ReceivedStatus &&
-                batch.RiskAssessment != null)
+            batch.LeafBatchStatus.Name == QueuedStatus &&
+            batch.RiskAssessment != null)
             .ToListAsync(cancellationToken);
 
         return _priorityEngine.Rank(

@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using UverTeaServerApp.src.Feature.GreenLeafModule.Commands.QueueGreenLeafBatch;
 using UverTeaServerApp.src.Feature.GreenLeafModule.Domain.Priority;
 using UverTeaServerApp.src.Feature.GreenLeafModule.Queries.GetGreenLeafYieldAnalysis;
 using UverTeaServerApp.src.Feature.GreenLeafModule.Queries.GetProcessingPriority;
@@ -73,6 +74,22 @@ public class GreenLeafProcessingController : ControllerBase
             areaId);
 
         var result = await _mediator.Send(query, cancellationToken);
+
+        return Ok(result);
+    }
+
+    [HttpPost("{greenLeafBatchId:int}/queue")]
+    [ProducesResponseType(
+    typeof(QueueGreenLeafBatchResponse),
+    StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<QueueGreenLeafBatchResponse>> QueueBatch(
+    int greenLeafBatchId,
+    CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new QueueGreenLeafBatchCommand(greenLeafBatchId),
+            cancellationToken);
 
         return Ok(result);
     }
