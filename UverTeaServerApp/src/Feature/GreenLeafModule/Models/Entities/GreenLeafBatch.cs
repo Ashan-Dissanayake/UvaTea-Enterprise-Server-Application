@@ -1,5 +1,6 @@
 using System;
 using UverTeaServerApp.src.Feature.AreaModule.Models.Entities;
+using UverTeaServerApp.src.Feature.UserModule.Models.Entities;
 
 namespace UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities;
 
@@ -42,5 +43,13 @@ public partial class Greenleafbatch
 
     public virtual Leafbatchstatus LeafBatchStatus { get; set; } = null!;
 
-public virtual Greenleafriskassessment? RiskAssessment { get; set; }
+    public virtual Greenleafriskassessment? RiskAssessment { get; set; }
+
+    public virtual User? RejectedByUser { get; set; }
+
+    public string? RejectionReason { get; set; }
+
+    public DateTime? RejectedAt { get; set; }
+
+    public int? RejectedByUserId { get; set; }
 }

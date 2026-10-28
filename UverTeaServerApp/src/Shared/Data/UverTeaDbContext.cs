@@ -1,3 +1,4 @@
+
 using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
@@ -16,26 +17,14 @@ public class UvaTeaDbContext : DbContext
     {
     }
 
-    // =========================================================
-    // Employee
-    // =========================================================
-
     public DbSet<Employee> Employees { get; set; }
     public DbSet<Employeestatus> EmployeeStatuses { get; set; }
     public DbSet<Gender> Genders { get; set; }
     public DbSet<Designation> Designations { get; set; }
 
-    // =========================================================
-    // User
-    // =========================================================
-
     public DbSet<Userstatus> Userstatuses { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<User> Users { get; set; }
-
-    // =========================================================
-    // Area
-    // =========================================================
 
     public DbSet<Areastatus> Areastatuses { get; set; }
     public DbSet<Areacategory> Areacategories { get; set; }
@@ -45,33 +34,22 @@ public class UvaTeaDbContext : DbContext
     public DbSet<Areagrowthstagehistory> Areagrowthstagehistories { get; set; }
     public DbSet<Areastatushistory> Areastatushistories { get; set; }
 
-    // =========================================================
-    // Green Leaf
-    // =========================================================
-
     public DbSet<Greenleafbatch> Greenleafbatches { get; set; }
     public DbSet<Containertype> Containertypes { get; set; }
     public DbSet<Weathercondition> Weatherconditions { get; set; }
     public DbSet<Leafcondition> Leafconditions { get; set; }
     public DbSet<Leafbatchstatus> Leafbatchstatuses { get; set; }
     public DbSet<Greenleafriskassessment> Greenleafriskassessment { get; set; }
-
     public DbSet<Greenleafprocessingrecord> Greenleafprocessingrecords
-    => Set<Greenleafprocessingrecord>();
-
+        => Set<Greenleafprocessingrecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        // =========================================================
-        // Global Soft Delete Configuration
-        // =========================================================
-
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            if (!typeof(ISoftDeletable)
-                .IsAssignableFrom(entityType.ClrType))
+            if (!typeof(ISoftDeletable).IsAssignableFrom(entityType.ClrType))
             {
                 continue;
             }
@@ -80,37 +58,26 @@ public class UvaTeaDbContext : DbContext
                 .Property(nameof(ISoftDeletable.IsDeleted))
                 .HasColumnName("isdeleted");
 
-            var parameter = Expression.Parameter(
-                entityType.ClrType,
-                "e");
+            var parameter = Expression.Parameter(entityType.ClrType, "e");
 
             var propertyMethodInfo = typeof(EF)
-                .GetMethod(
-                    nameof(EF.Property),
-                    BindingFlags.Static | BindingFlags.Public)
+                .GetMethod(nameof(EF.Property), BindingFlags.Static | BindingFlags.Public)
                 ?.MakeGenericMethod(typeof(bool));
 
             var isDeletedProperty = Expression.Call(
                 propertyMethodInfo!,
                 parameter,
-                Expression.Constant(
-                    nameof(ISoftDeletable.IsDeleted)));
+                Expression.Constant(nameof(ISoftDeletable.IsDeleted)));
 
             var compareExpression = Expression.Equal(
                 isDeletedProperty,
                 Expression.Constant(false));
 
-            var lambda = Expression.Lambda(
-                compareExpression,
-                parameter);
+            var lambda = Expression.Lambda(compareExpression, parameter);
 
             modelBuilder.Entity(entityType.ClrType)
                 .HasQueryFilter(lambda);
         }
-
-        // =========================================================
-        // Entity Configurations
-        // =========================================================
 
         modelBuilder.ApplyConfigurationsFromAssembly(
             typeof(UvaTeaDbContext).Assembly);

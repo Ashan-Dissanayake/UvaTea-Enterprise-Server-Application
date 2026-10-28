@@ -571,6 +571,19 @@ namespace UverTeaServerApp.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("pluckingdatetime");
 
+                    b.Property<DateTime?>("RejectedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("rejected_at");
+
+                    b.Property<int?>("RejectedByUserId")
+                        .HasColumnType("int")
+                        .HasColumnName("rejected_by_user_id");
+
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnName("rejection_reason");
+
                     b.Property<string>("Remarks")
                         .HasColumnType("text")
                         .HasColumnName("remarks");
@@ -599,6 +612,8 @@ namespace UverTeaServerApp.Migrations
                     b.HasIndex("LeafBatchStatusId");
 
                     b.HasIndex("LeafConditionId");
+
+                    b.HasIndex("RejectedByUserId");
 
                     b.HasIndex("WeatherConditionId");
 
@@ -1087,6 +1102,11 @@ namespace UverTeaServerApp.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("UverTeaServerApp.src.Feature.UserModule.Models.Entities.User", "RejectedByUser")
+                        .WithMany()
+                        .HasForeignKey("RejectedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("UverTeaServerApp.src.Feature.GreenLeafModule.Models.Entities.Weathercondition", "WeatherCondition")
                         .WithMany("Greenleafbatchs")
                         .HasForeignKey("WeatherConditionId")
@@ -1100,6 +1120,8 @@ namespace UverTeaServerApp.Migrations
                     b.Navigation("LeafBatchStatus");
 
                     b.Navigation("LeafCondition");
+
+                    b.Navigation("RejectedByUser");
 
                     b.Navigation("WeatherCondition");
                 });

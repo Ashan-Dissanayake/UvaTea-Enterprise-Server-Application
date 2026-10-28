@@ -83,6 +83,17 @@ public class GreenleafbatchConfiguration
             .HasColumnType("datetime")
             .IsRequired();
 
+        builder.Property(g => g.RejectionReason)
+    .HasColumnName("rejection_reason")
+    .HasMaxLength(1000);
+
+        builder.Property(g => g.RejectedAt)
+            .HasColumnName("rejected_at")
+            .HasColumnType("datetime");
+
+        builder.Property(g => g.RejectedByUserId)
+            .HasColumnName("rejected_by_user_id");
+
         // Relationships
         builder.HasOne(g => g.Area)
             .WithMany()
@@ -114,6 +125,11 @@ public class GreenleafbatchConfiguration
             .WithOne(r => r.GreenLeafBatch)
             .HasForeignKey<Greenleafriskassessment>(
                 r => r.GreenLeafBatchId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(g => g.RejectedByUser)
+            .WithMany()
+            .HasForeignKey(g => g.RejectedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }
